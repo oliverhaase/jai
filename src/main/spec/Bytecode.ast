@@ -8,6 +8,8 @@ Method ::= <IsAbstract:boolean> <IsNative:boolean> <IsPrivate:boolean> <IsFinal:
            <MethodName:String> <SignatureIndex:int> Type* TypeOrVoid
             <MaxLocals:int>  Instruction*;
 
+abstract TypeOrVoid;
+
 Type : TypeOrVoid;
 Void : TypeOrVoid;
 
