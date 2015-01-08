@@ -1,0 +1,75 @@
+
+
+Program ::= ByteCodeClass*;
+
+ByteCodeClass ::= <Name:String> <SuperClass:String> <IsFinal:boolean> Method*;
+
+Method ::= <IsAbstract:boolean> <IsNative:boolean> <IsPrivate:boolean> <IsFinal:boolean>
+           <MethodName:String> <SignatureIndex:int> Type* TypeOrVoid
+            <MaxLocals:int>  Instruction*;
+
+Type : TypeOrVoid;
+Void : TypeOrVoid;
+
+PrimitiveType : Type;
+ReferenceType : Type ::= <Type:String>;
+
+
+abstract Instruction ::= <Label:String> <Position:int> <ConsumeStack:int> <ProduceStack:int>;
+
+EntryPoint : Instruction;
+
+SimpleInstruction : Instruction;
+
+ArrayLength : Instruction;
+AconstNull : Instruction;
+Athrow : Instruction;
+
+
+abstract FieldAssignmentInstruction : Instruction ::= <FieldName:String>;
+PutField : FieldAssignmentInstruction;
+Aastore : FieldAssignmentInstruction;
+PutStatic : FieldAssignmentInstruction;
+
+abstract FieldLoadInstruction : Instruction ::= <FieldName:String> <FieldType:org.apache.bcel.generic.Type>;
+GetField : FieldLoadInstruction;
+Aaload : FieldLoadInstruction;
+GetStatic : FieldLoadInstruction;
+
+Ldc : Instruction ::= <ConstantType:org.apache.bcel.generic.Type>;
+
+GotoInstruction : Instruction ::= <TargetPosition:int>;
+BranchInstruction : Instruction ::= <TargetPositions:int[]>;
+
+
+abstract InvokeInstruction : Instruction ::= <LoadClass:String> <MethodName:String> 
+	<ArgTypes:org.apache.bcel.generic.Type[]> <ReturnType:org.apache.bcel.generic.Type>;
+InvokeInterface : InvokeInstruction;
+InvokeSpecial : InvokeInstruction;
+InvokeStatic : InvokeInstruction;
+InvokeVirtual : InvokeInstruction;
+
+abstract NewInstruction : Instruction  ::= <Type:String>;
+New : NewInstruction;
+NewArray : NewInstruction;
+ANewArray : NewInstruction;
+MultiANewArray : NewInstruction;
+
+
+LoadInstruction : Instruction ::= <Index:int>;
+StoreInstruction : Instruction ::= <Index:int>;
+
+abstract StackInstruction : Instruction;
+DUP : StackInstruction;
+DUP_X1 : StackInstruction;
+DUP_X2 : StackInstruction;
+DUP2 : StackInstruction;
+DUP2_X1 : StackInstruction;
+DUP2_X2 : StackInstruction;
+SWAP : StackInstruction;
+
+ReturnInstruction : Instruction ::= <Size:int>;
+Areturn : ReturnInstruction;
+
+
+ExitPoint : Instruction;
