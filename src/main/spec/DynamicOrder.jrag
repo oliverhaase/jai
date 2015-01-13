@@ -1,0 +1,50 @@
+
+aspect DynamicOrder {
+	
+	syn Instruction Method.lookup(int position) {
+		for ( Instruction instruction : getInstructions() ) 
+			if ( instruction.getPosition() == position ) 
+				return instruction;
+		return null;
+	}
+	
+	inh Instruction Instruction.localLookup(int position);	
+	eq Method.getInstruction(int i).localLookup(int position) = lookup(position);
+	
+	syn Instruction GotoInstruction.target() = localLookup(getTargetPosition());	
+	
+	syn Set<Instruction> BranchInstruction.targets() {
+		Set<Instruction> targets = new HashSet<Instruction>();
+		for ( int targetPos : getTargetPositions() ) 
+			targets.add(localLookup(targetPos)); 
+		return targets;	
+	}
+	
+	// successors 
+	
+	syn Set<Instruction> Instruction.succ();
+	
+	eq Instruction.succ() = Collections.singleton(next());
+	eq GotoInstruction.succ() = Collections.singleton(target());
+
+	eq BranchInstruction.succ() {
+		Set<Instruction> result = new HashSet<Instruction>();
+		result.add(next());
+		result.addAll(targets());
+		return result;
+	}
+		
+	eq ReturnInstruction.succ() = Collections.singleton(method().exitPoint());		
+	eq Athrow.succ() = Collections.singleton(method().exitPoint());
+	eq ExitPoint.succ() = new HashSet<Instruction>();
+
+	
+	// predecessors 
+
+	coll Set<Instruction> Instruction.pred() [new HashSet<Instruction>()] with add root Method;
+  
+  	Instruction contributes this
+    	to Instruction.pred()
+    	for each succ();
+    	
+}
