@@ -1,0 +1,22 @@
+
+aspect StaticOrder {
+	inh Instruction Instruction.next();	
+	eq Method.getInstruction(int i).next() = 
+		( i < getNumInstruction() -1 ) ? getInstruction(i + 1) : null;
+	
+	inh Instruction Instruction.previous();
+	eq Method.getInstruction(int i).previous() = ( i > 0 ) ? getInstruction(i - 1) : null;
+	
+	syn Instruction Method.entryPoint() = getInstruction(0);
+	syn Instruction Method.exitPoint() = getInstruction(getNumInstruction() -1);		
+	
+	inh Method Instruction.method();	
+	eq Method.getInstruction(int i).method() = this;
+	
+	inh ByteCodeClass Method.clazz();
+	eq ByteCodeClass.getMethod(int i).clazz() = this;
+	
+	inh Program ByteCodeClass.program();
+	eq Program.getChild().program() = this;
+					
+}
