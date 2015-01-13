@@ -1,0 +1,13 @@
+aspect MethodSignature {
+
+	syn int Method.numArgs() = getNumType();
+	
+	syn Type Method.getArg(int i) = getType(i);
+	
+	syn TypeOrVoid Method.getReturnType() = getTypeOrVoid();
+	
+	syn boolean Method.isVoid() = getTypeOrVoid() instanceof Void;
+	
+	syn boolean Method.hasRefReturnType() = getTypeOrVoid() instanceof ReferenceType;
+		
+}
