@@ -1,0 +1,5 @@
+aspect toString {
+    syn String ByteCodeClass.toString() = "ByteCodeClass: " + getName();
+    syn String Method.toString() = "Method: " + getMethodName();
+    syn String Instruction.toString() = "Instruction: " + getLabel() + " - " + getPosition();
+}
