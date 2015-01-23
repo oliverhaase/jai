@@ -1,10 +1,17 @@
 package de.htwg_konstanz.jai;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.generic.BasicType;
+import org.apache.bcel.generic.CodeExceptionGen;
 import org.apache.bcel.generic.ConstantPoolGen;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.InstructionList;
+import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.ObjectType;
 
 import de.htwg_konstanz.jai.gen.ByteCodeClass;
@@ -74,15 +81,36 @@ public class AstConverter {
 			InstructionHandle[] instructionHandles = new InstructionList(bcelMethod.getCode()
 					.getCode()).getInstructionHandles();
 
-			method.addInstruction(new EntryPoint("entry point", -1, 0, 0));
+			method.addInstruction(new EntryPoint("entry point", -1, 0, 0, new LinkedList<Integer>()));
 
+			Map<Integer, List<Integer>> exceptionHandlers = getExceptionHandlers(bcelMethod);
 			for (InstructionHandle instructionHandle : instructionHandles)
-				method.addInstruction(convertInstruction(instructionHandle, visitor, cpg));
+				method.addInstruction(convertInstruction(instructionHandle, visitor, cpg,
+						exceptionHandlers));
 
-			method.addInstruction(new ExitPoint("exit point", -1, 0, 0));
+			method.addInstruction(new ExitPoint("exit point", -1, 0, 0, new LinkedList<Integer>()));
 
 		}
 		return clazz;
+	}
+
+	/**
+	 * Returns the ExceptionHandlers as a Map of instruction positions. 
+	 * @return Map<Last instruction of try, List<Start of Handler>> 
+	 */
+	private Map<Integer, List<Integer>> getExceptionHandlers(
+			org.apache.bcel.classfile.Method bcelMethod) {
+		Map<Integer, List<Integer>> exceptionHandlers = new HashMap<Integer, List<Integer>>();
+		for (CodeExceptionGen codeExceptionGen : new MethodGen(bcelMethod,
+				bcelClass.getClassName(), new ConstantPoolGen(bcelClass.getConstantPool()))
+				.getExceptionHandlers()) {
+			Integer endOfTryInstruction = codeExceptionGen.getEndPC().getPosition();
+			if (!exceptionHandlers.containsKey(endOfTryInstruction))
+				exceptionHandlers.put(endOfTryInstruction, new LinkedList<Integer>());
+			exceptionHandlers.get(endOfTryInstruction).add(
+					codeExceptionGen.getHandlerPC().getPosition());
+		}
+		return exceptionHandlers;
 	}
 
 	private Type createJastAddType(org.apache.bcel.generic.Type argType) {
@@ -109,7 +137,8 @@ public class AstConverter {
 	}
 
 	private Instruction convertInstruction(InstructionHandle instructionHandle,
-			AstConverterVisitor visitor, ConstantPoolGen cpg) {
+			AstConverterVisitor visitor, ConstantPoolGen cpg,
+			Map<Integer, List<Integer>> exceptionHandlers) {
 		Instruction instruction;
 
 		instructionHandle.accept(visitor);
@@ -125,7 +154,12 @@ public class AstConverter {
 		instruction.setPosition(instructionHandle.getPosition());
 		instruction.setConsumeStack(instructionHandle.getInstruction().consumeStack(cpg));
 		instruction.setProduceStack(instructionHandle.getInstruction().produceStack(cpg));
+
+		if (exceptionHandlers.containsKey(instructionHandle.getPosition()))
+			instruction.setExceptionHandler(exceptionHandlers.get(instructionHandle.getPosition()));
+		else
+			instruction.setExceptionHandler(new LinkedList<Integer>());
+
 		return instruction;
 	}
-
 }

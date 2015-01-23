@@ -3,17 +3,17 @@
 // Maximum means several things:
 // - conditional statements have multiple successors, one per possible branch
 // - for a try block, each corresponding catch clause as well as the 
-		regular next instruction belong to its successors
+//		regular next instruction belong to its successors
 // - try blocks are assumed to be executed until the end to model the maximum
-		effect of the block; if an exception is thrown within the block, the 
-		actual effect might in fact be smaller. In this sense, the maximum 
-		effect happens when no exception is thrown or an exception is thrown 
-		in the last statement of the try block.
+//		effect of the block; if an exception is thrown within the block, the 
+//		actual effect might in fact be smaller. In this sense, the maximum 
+//		effect happens when no exception is thrown or an exception is thrown 
+//		in the last statement of the try block.
 // - likewise, method bodies outside try blocks are assumed to be executed until the 
-		end to model the maximum effect of the method; if an exception is thrown 
-		within the method, the actual effect might in fact be smaller. In this sense, 
-		the maximum effect happens when no exception is thrown or an exception is thrown 
-		in the last statement of the method body.		    
+//		end to model the maximum effect of the method; if an exception is thrown 
+//		within the method, the actual effect might in fact be smaller. In this sense, 
+//		the maximum effect happens when no exception is thrown or an exception is thrown 
+//		in the last statement of the method body.		    
 
 
 aspect DynamicOrder {
@@ -37,22 +37,49 @@ aspect DynamicOrder {
 		return targets;	
 	}
 	
+    protected Set<Instruction> Instruction.exceptionHandlers() {
+        Set<Instruction> result = new HashSet<Instruction>();
+        for (Integer position : getExceptionHandler() ) 
+            result.add(localLookup(position)); 
+        return result; 
+    }
+    
+    protected Set<Instruction> Instruction.exceptionHandlersAndNext() {
+        Set<Instruction> result = exceptionHandlers();
+        result.add(next());
+        return result; 
+    }
+	
 	// successors 
 	
 	syn Set<Instruction> Instruction.succ();
 	
-	eq Instruction.succ() = Collections.singleton(next());
-	eq GotoInstruction.succ() = Collections.singleton(target());
-
-	eq BranchInstruction.succ() {
-		Set<Instruction> result = new HashSet<Instruction>();
-		result.add(next());
-		result.addAll(targets());
-		return result;
+	eq Instruction.succ() = exceptionHandlersAndNext();
+	
+	eq GotoInstruction.succ() {
+        Set<Instruction> result = exceptionHandlersAndNext();
+        result.add(target());
+        return result;
+    }
+	
+    eq BranchInstruction.succ() {
+        Set<Instruction> result = exceptionHandlersAndNext();
+        result.addAll(targets());
+        return result;
+    }
+	
+	eq ReturnInstruction.succ() {
+        Set<Instruction> result = exceptionHandlers();
+        result.add(method().exitPoint());
+        return result;
 	}
-		
-	eq ReturnInstruction.succ() = Collections.singleton(method().exitPoint());		
-	eq Athrow.succ() = Collections.singleton(method().exitPoint());
+	
+   eq Athrow.succ() {
+        Set<Instruction> result = exceptionHandlers();
+        result.add(method().exitPoint());
+        return result;
+    }
+    
 	eq ExitPoint.succ() = new HashSet<Instruction>();
 
 	
