@@ -57,7 +57,7 @@ aspect DynamicOrder {
 	eq Instruction.succ() = exceptionHandlersAndNext();
 	
 	eq GotoInstruction.succ() {
-        Set<Instruction> result = exceptionHandlersAndNext();
+        Set<Instruction> result = exceptionHandlers();
         result.add(target());
         return result;
     }
