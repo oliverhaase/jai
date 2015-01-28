@@ -1,0 +1,46 @@
+
+aspect State {
+
+
+
+	syn State Method.createState() =
+//		new State(initialHeap(), refParamIndexes(), getMaxLocals());
+		new State();
+
+
+
+	// set of incoming states, statesIn() 	
+		
+	coll Set<State> Instruction.statesIn() circular [new HashSet<State>()] with addAll root Method;
+	Instruction contributes statesOut() to Instruction.statesIn() for each succ();
+
+	syn Set<State> EntryPoint.statesIn() = Collections.singleton(method().createState());
+	
+
+		
+	// set of outgoing states, statesOut()
+	
+	syn Set<State> Instruction.statesOut() circular [new HashSet<State>()]; 
+      	
+    eq Instruction.statesOut() {
+    	Set<State> resultSet = new HashSet<State>();
+
+		for ( State stateIn : statesIn() ) 
+		   resultSet.add(transfer(stateIn)); 
+		   
+		return resultSet;   
+	}	
+				
+	
+	eq ReturnInstruction.statesOut() = null;
+	eq Areturn.statesOut() = null;
+	
+	
+	// transfer attribute
+	
+	syn State Instruction.transfer(State stateIn) {
+		return new State(transferLocals(stateIn.getLocals(), 
+			transferOpStack(stateIn.getOpStack()), 
+			transferEdges(stateIn.getEdges()));
+	}
+}
