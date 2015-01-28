@@ -39,7 +39,7 @@ aspect DynamicOrder {
 	
     protected Set<Instruction> Instruction.exceptionHandlers() {
         Set<Instruction> result = new HashSet<Instruction>();
-        for (Integer position : getExceptionHandler() ) 
+        for (Integer position : getExceptionHandlers() ) 
             result.add(localLookup(position)); 
         return result; 
     }

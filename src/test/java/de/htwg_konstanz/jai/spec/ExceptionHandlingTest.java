@@ -161,7 +161,7 @@ public class ExceptionHandlingTest {
 
 		Instruction instruction = instructions.get(END_OF_TRY);
 
-		List<Integer> exceptionHandler = instruction.getExceptionHandler();
+		List<Integer> exceptionHandler = instruction.getExceptionHandlers();
 
 		assertTrue(exceptionHandler.size() == 2);
 		assertTrue(exceptionHandler.contains(CATCH1));
@@ -184,18 +184,18 @@ public class ExceptionHandlingTest {
 		for (Instruction i : method.getInstructions())
 			instructions.put(i.getPosition(), i);
 
-		List<Integer> exceptionHandler = instructions.get(END_OF_TRY).getExceptionHandler();
+		List<Integer> exceptionHandler = instructions.get(END_OF_TRY).getExceptionHandlers();
 
 		assertTrue(exceptionHandler.size() == 2);
 		assertTrue(exceptionHandler.contains(CATCH1));
 		assertTrue(exceptionHandler.contains(CATCH2));
 
-		exceptionHandler = instructions.get(CATCH1 + 2).getExceptionHandler();
+		exceptionHandler = instructions.get(CATCH1 + 2).getExceptionHandlers();
 
 		assertTrue(exceptionHandler.size() == 1);
 		assertTrue(exceptionHandler.contains(FINALLY));
 
-		exceptionHandler = instructions.get(CATCH2 + 2).getExceptionHandler();
+		exceptionHandler = instructions.get(CATCH2 + 2).getExceptionHandlers();
 
 		assertTrue(exceptionHandler.size() == 1);
 		assertTrue(exceptionHandler.contains(FINALLY));
@@ -214,7 +214,7 @@ public class ExceptionHandlingTest {
 		for (Instruction i : method.getInstructions())
 			instructions.put(i.getPosition(), i);
 
-		List<Integer> exceptionHandler = instructions.get(END_OF_TRY).getExceptionHandler();
+		List<Integer> exceptionHandler = instructions.get(END_OF_TRY).getExceptionHandlers();
 
 		assertTrue(exceptionHandler.size() == 1);
 		assertTrue(exceptionHandler.contains(FINALLY));

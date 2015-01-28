@@ -95,8 +95,9 @@ public class AstConverter {
 	}
 
 	/**
-	 * Returns the ExceptionHandlers as a Map of instruction positions. 
-	 * @return Map<Last instruction of try, List<Start of Handler>> 
+	 * Returns the ExceptionHandlers as a Map of instruction positions.
+	 * 
+	 * @return Map<Last instruction of try, List<Start of Handler>>
 	 */
 	private Map<Integer, List<Integer>> getExceptionHandlers(
 			org.apache.bcel.classfile.Method bcelMethod) {
@@ -156,9 +157,10 @@ public class AstConverter {
 		instruction.setProduceStack(instructionHandle.getInstruction().produceStack(cpg));
 
 		if (exceptionHandlers.containsKey(instructionHandle.getPosition()))
-			instruction.setExceptionHandler(exceptionHandlers.get(instructionHandle.getPosition()));
+			instruction
+					.setExceptionHandlers(exceptionHandlers.get(instructionHandle.getPosition()));
 		else
-			instruction.setExceptionHandler(new LinkedList<Integer>());
+			instruction.setExceptionHandlers(new LinkedList<Integer>());
 
 		return instruction;
 	}
