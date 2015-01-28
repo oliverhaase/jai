@@ -17,7 +17,7 @@ PrimitiveType : Type;
 ReferenceType : Type ::= <Type:String>;
 
 
-abstract Instruction ::= <Label:String> <Position:int> <ConsumeStack:int> <ProduceStack:int> <ExceptionHandler:java.util.List<Integer>>;
+abstract Instruction ::= <Label:String> <Position:int> <ConsumeStack:int> <ProduceStack:int> <ExceptionHandlers:java.util.List<Integer>>;
 
 EntryPoint : Instruction;
 
