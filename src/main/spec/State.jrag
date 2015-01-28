@@ -39,8 +39,11 @@ aspect State {
 	// transfer attribute
 	
 	syn State Instruction.transfer(State stateIn) {
-		return new State(transferLocals(stateIn.getLocals(), 
-			transferOpStack(stateIn.getOpStack()), 
-			transferEdges(stateIn.getEdges()));
+//		return new State(transferLocals(stateIn.getLocals()), 
+//			transferOpStack(stateIn.getOpStack()), 
+//			transferEdges(stateIn.getEdges()));
+		return null;
 	}
+	
+	
 }
