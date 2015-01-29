@@ -1,5 +1,6 @@
 package de.htwg_konstanz.jai;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -160,7 +161,8 @@ public class AstConverter {
 			instruction
 					.setExceptionHandlers(exceptionHandlers.get(instructionHandle.getPosition()));
 		else
-			instruction.setExceptionHandlers(new LinkedList<Integer>());
+			// instruction.setExceptionHandlers(new LinkedList<Integer>());
+			instruction.setExceptionHandlers(Collections.<Integer> emptyList());
 
 		return instruction;
 	}
