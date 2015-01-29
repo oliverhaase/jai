@@ -9,6 +9,8 @@ import org.apache.bcel.Repository;
 import org.apache.bcel.classfile.JavaClass;
 
 import de.htwg_konstanz.jai.vm.State;
+import de.htwg_konstanz.jai.vm.LocalVars;
+import de.htwg_konstanz.jai.vm.Slot;
 
 
 aspect Imports {
