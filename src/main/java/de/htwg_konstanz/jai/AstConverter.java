@@ -2,9 +2,9 @@ package de.htwg_konstanz.jai;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.generic.BasicType;
@@ -82,14 +82,16 @@ public class AstConverter {
 			InstructionHandle[] instructionHandles = new InstructionList(bcelMethod.getCode()
 					.getCode()).getInstructionHandles();
 
-			method.addInstruction(new EntryPoint("entry point", -1, 0, 0, new LinkedList<Integer>()));
+			method.addInstruction(new EntryPoint("entry point", -1, 0, 0, Collections
+					.<Integer> emptySet()));
 
-			Map<Integer, List<Integer>> exceptionHandlers = getExceptionHandlers(bcelMethod);
+			Map<Integer, Set<Integer>> exceptionHandlers = getExceptionHandlers(bcelMethod);
 			for (InstructionHandle instructionHandle : instructionHandles)
 				method.addInstruction(convertInstruction(instructionHandle, visitor, cpg,
 						exceptionHandlers));
 
-			method.addInstruction(new ExitPoint("exit point", -1, 0, 0, new LinkedList<Integer>()));
+			method.addInstruction(new ExitPoint("exit point", -1, 0, 0, Collections
+					.<Integer> emptySet()));
 
 		}
 		return clazz;
@@ -100,15 +102,15 @@ public class AstConverter {
 	 * 
 	 * @return Map<Last instruction of try, List<Start of Handler>>
 	 */
-	private Map<Integer, List<Integer>> getExceptionHandlers(
+	private Map<Integer, Set<Integer>> getExceptionHandlers(
 			org.apache.bcel.classfile.Method bcelMethod) {
-		Map<Integer, List<Integer>> exceptionHandlers = new HashMap<Integer, List<Integer>>();
+		Map<Integer, Set<Integer>> exceptionHandlers = new HashMap<Integer, Set<Integer>>();
 		for (CodeExceptionGen codeExceptionGen : new MethodGen(bcelMethod,
 				bcelClass.getClassName(), new ConstantPoolGen(bcelClass.getConstantPool()))
 				.getExceptionHandlers()) {
 			Integer endOfTryInstruction = codeExceptionGen.getEndPC().getPosition();
 			if (!exceptionHandlers.containsKey(endOfTryInstruction))
-				exceptionHandlers.put(endOfTryInstruction, new LinkedList<Integer>());
+				exceptionHandlers.put(endOfTryInstruction, new HashSet<Integer>());
 			exceptionHandlers.get(endOfTryInstruction).add(
 					codeExceptionGen.getHandlerPC().getPosition());
 		}
@@ -140,7 +142,7 @@ public class AstConverter {
 
 	private Instruction convertInstruction(InstructionHandle instructionHandle,
 			AstConverterVisitor visitor, ConstantPoolGen cpg,
-			Map<Integer, List<Integer>> exceptionHandlers) {
+			Map<Integer, Set<Integer>> exceptionHandlers) {
 		Instruction instruction;
 
 		instructionHandle.accept(visitor);
@@ -162,7 +164,7 @@ public class AstConverter {
 					.setExceptionHandlers(exceptionHandlers.get(instructionHandle.getPosition()));
 		else
 			// instruction.setExceptionHandlers(new LinkedList<Integer>());
-			instruction.setExceptionHandlers(Collections.<Integer> emptyList());
+			instruction.setExceptionHandlers(Collections.<Integer> emptySet());
 
 		return instruction;
 	}

@@ -1,10 +1,10 @@
 package de.htwg_konstanz.jai.spec;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -161,7 +161,7 @@ public class ExceptionHandlingTest {
 
 		Instruction instruction = instructions.get(END_OF_TRY);
 
-		List<Integer> exceptionHandler = instruction.getExceptionHandlers();
+		Set<Integer> exceptionHandler = instruction.getExceptionHandlers();
 
 		assertTrue(exceptionHandler.size() == 2);
 		assertTrue(exceptionHandler.contains(CATCH1));
@@ -184,7 +184,7 @@ public class ExceptionHandlingTest {
 		for (Instruction i : method.getInstructions())
 			instructions.put(i.getPosition(), i);
 
-		List<Integer> exceptionHandler = instructions.get(END_OF_TRY).getExceptionHandlers();
+		Set<Integer> exceptionHandler = instructions.get(END_OF_TRY).getExceptionHandlers();
 
 		assertTrue(exceptionHandler.size() == 2);
 		assertTrue(exceptionHandler.contains(CATCH1));
@@ -214,7 +214,7 @@ public class ExceptionHandlingTest {
 		for (Instruction i : method.getInstructions())
 			instructions.put(i.getPosition(), i);
 
-		List<Integer> exceptionHandler = instructions.get(END_OF_TRY).getExceptionHandlers();
+		Set<Integer> exceptionHandler = instructions.get(END_OF_TRY).getExceptionHandlers();
 
 		assertTrue(exceptionHandler.size() == 1);
 		assertTrue(exceptionHandler.contains(FINALLY));
