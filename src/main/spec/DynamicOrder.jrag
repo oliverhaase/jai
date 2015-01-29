@@ -37,51 +37,39 @@ aspect DynamicOrder {
 		return targets;	
 	}
 	
-    protected Set<Instruction> Instruction.exceptionHandlers() {
-        Set<Instruction> result = new HashSet<Instruction>();
-        for (Integer position : getExceptionHandlers() ) 
-            result.add(localLookup(position)); 
-        return result; 
-    }
-    
-    protected Set<Instruction> Instruction.exceptionHandlersAndNext() {
-        Set<Instruction> result = exceptionHandlers();
-        result.add(next());
-        return result; 
-    }
+		
+	// regular successors, i.e. ignoring exception handling 
 	
-	// successors 
+	syn Set<Instruction> Instruction.regularSucc();
 	
-	syn Set<Instruction> Instruction.succ();
-	
-	eq Instruction.succ() = exceptionHandlersAndNext();
-	
-	eq GotoInstruction.succ() {
-        Set<Instruction> result = exceptionHandlers();
-        result.add(target());
-        return result;
-    }
-	
-    eq BranchInstruction.succ() {
-        Set<Instruction> result = exceptionHandlersAndNext();
-        result.addAll(targets());
-        return result;
-    }
-	
-	eq ReturnInstruction.succ() {
-        Set<Instruction> result = exceptionHandlers();
-        result.add(method().exitPoint());
-        return result;
-	}
-	
-   eq Athrow.succ() {
-        Set<Instruction> result = exceptionHandlers();
-        result.add(method().exitPoint());
-        return result;
-    }
-    
-	eq ExitPoint.succ() = new HashSet<Instruction>();
+	eq Instruction.regularSucc() = Collections.<Instruction>singleton(next());
+	eq GotoInstruction.regularSucc() = Collections.<Instruction>singleton(target());
 
+	eq BranchInstruction.regularSucc() {
+		Set<Instruction> result = new HashSet<Instruction>();
+		result.add(next());
+		result.addAll(targets());
+		return result;
+	}
+		
+	eq ReturnInstruction.regularSucc() = Collections.<Instruction>singleton(method().exitPoint());		
+	eq Athrow.regularSucc() = Collections.<Instruction>singleton(method().exitPoint());
+	eq ExitPoint.regularSucc() = Collections.<Instruction>emptySet();
+	
+	
+	// all successors, including exception handling
+		
+	syn Set<Instruction> Instruction.succ() {
+		if ( getExceptionHandlers().isEmpty() )
+			return regularSucc();
+		
+		Set<Instruction> result = new HashSet<Instruction>(regularSucc());
+		for (Integer position : getExceptionHandlers() ) 
+			result.add(localLookup(position)); 
+		
+		return result;
+	}		
+						
 	
 	// predecessors 
 
