@@ -1,6 +1,6 @@
 package de.htwg_konstanz.jai.spec;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.NoSuchElementException;
@@ -163,7 +163,7 @@ public class ExceptionHandlingTest {
 
 		Set<Integer> exceptionHandler = instruction.getExceptionHandlers();
 
-		assertTrue(exceptionHandler.size() == 2);
+		assertEquals(2, exceptionHandler.size());
 		assertTrue(exceptionHandler.contains(CATCH1));
 		assertTrue(exceptionHandler.contains(CATCH2));
 
@@ -186,18 +186,19 @@ public class ExceptionHandlingTest {
 
 		Set<Integer> exceptionHandler = instructions.get(END_OF_TRY).getExceptionHandlers();
 
-		assertTrue(exceptionHandler.size() == 2);
+		assertEquals(3, exceptionHandler.size());
 		assertTrue(exceptionHandler.contains(CATCH1));
 		assertTrue(exceptionHandler.contains(CATCH2));
+		assertTrue(exceptionHandler.contains(FINALLY));
 
 		exceptionHandler = instructions.get(CATCH1 + 2).getExceptionHandlers();
 
-		assertTrue(exceptionHandler.size() == 1);
+		assertEquals(1, exceptionHandler.size());
 		assertTrue(exceptionHandler.contains(FINALLY));
 
 		exceptionHandler = instructions.get(CATCH2 + 2).getExceptionHandlers();
 
-		assertTrue(exceptionHandler.size() == 1);
+		assertEquals(1, exceptionHandler.size());
 		assertTrue(exceptionHandler.contains(FINALLY));
 	}
 
@@ -216,7 +217,7 @@ public class ExceptionHandlingTest {
 
 		Set<Integer> exceptionHandler = instructions.get(END_OF_TRY).getExceptionHandlers();
 
-		assertTrue(exceptionHandler.size() == 1);
+		assertEquals(1, exceptionHandler.size());
 		assertTrue(exceptionHandler.contains(FINALLY));
 	}
 
