@@ -100,19 +100,27 @@ public class AstConverter {
 	/**
 	 * Returns the ExceptionHandlers as a Map of instruction positions.
 	 * 
-	 * @return Map<Last instruction of try, List<Start of Handler>>
+	 * @return Map<instruction in try{}, List<Start of Handler>>
 	 */
 	private Map<Integer, Set<Integer>> getExceptionHandlers(
 			org.apache.bcel.classfile.Method bcelMethod) {
 		Map<Integer, Set<Integer>> exceptionHandlers = new HashMap<Integer, Set<Integer>>();
-		for (CodeExceptionGen codeExceptionGen : new MethodGen(bcelMethod,
-				bcelClass.getClassName(), new ConstantPoolGen(bcelClass.getConstantPool()))
-				.getExceptionHandlers()) {
-			Integer endOfTryInstruction = codeExceptionGen.getEndPC().getPosition();
-			if (!exceptionHandlers.containsKey(endOfTryInstruction))
-				exceptionHandlers.put(endOfTryInstruction, new HashSet<Integer>());
-			exceptionHandlers.get(endOfTryInstruction).add(
-					codeExceptionGen.getHandlerPC().getPosition());
+		MethodGen methodGen = new MethodGen(bcelMethod, bcelClass.getClassName(),
+				new ConstantPoolGen(bcelClass.getConstantPool()));
+
+		for (CodeExceptionGen codeExceptionGen : methodGen.getExceptionHandlers()) {
+			for (InstructionHandle protectedInstruction = codeExceptionGen.getStartPC(); !protectedInstruction
+					.equals(codeExceptionGen.getEndPC()); protectedInstruction = protectedInstruction
+					.getNext()) {
+				Integer position = protectedInstruction.getPosition();
+				if (!exceptionHandlers.containsKey(position))
+					exceptionHandlers.put(position, new HashSet<Integer>());
+				exceptionHandlers.get(position).add(codeExceptionGen.getHandlerPC().getPosition());
+			}
+			Integer position = codeExceptionGen.getEndPC().getPosition();
+			if (!exceptionHandlers.containsKey(position))
+				exceptionHandlers.put(position, new HashSet<Integer>());
+			exceptionHandlers.get(position).add(codeExceptionGen.getHandlerPC().getPosition());
 		}
 		return exceptionHandlers;
 	}
