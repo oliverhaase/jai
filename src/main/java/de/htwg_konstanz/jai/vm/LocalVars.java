@@ -14,14 +14,9 @@ public class LocalVars {
 
 	public LocalVars(int maxLocals) {
 		vars = new Slot[maxLocals];
+		for (Slot var : vars)
+			var = PrimitiveSlot.INSTANCE;
 	}
-
-	// public LocalVars(@NonNull Slot[] vars) {
-	// this.vars = new Slot[vars.length];
-	//
-	// for (int i = 0; i < vars.length; i++)
-	// this.vars[i] = (vars[i] == null) ? null : vars[i].copy();
-	// }
 
 	private LocalVars(LocalVars original) {
 		vars = new Slot[original.vars.length];
