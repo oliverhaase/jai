@@ -1,8 +1,10 @@
 aspect MethodSignature {
 
-	syn int Method.numArgs() = getNumType();
+//	syn int Method.numArgs() = getNumType();
 	
-	syn Type Method.getArg(int i) = getType(i);
+//	syn Type Method.getArg(int i) = getType(i);
+
+	syn List<Type> Method.getArgs() = getTypes();
 	
 	syn TypeOrVoid Method.getReturnType() = getTypeOrVoid();
 	
