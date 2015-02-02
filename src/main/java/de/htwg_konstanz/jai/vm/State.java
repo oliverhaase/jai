@@ -1,13 +1,10 @@
 package de.htwg_konstanz.jai.vm;
 
 public final class State {
+	private final LocalVars localVars;
 
 	public State(LocalVars localVars) {
-		// TODO Auto-generated constructor stub
-	}
-
-	public State() {
-		// TODO Auto-generated constructor stub
+		this.localVars = localVars;
 	}
 
 	public Object getEdges() {

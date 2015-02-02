@@ -1,9 +1,9 @@
 
 aspect State {
 
-	syn State Method.createState() =
+	syn State Method.createInitialState() =
 //		new State(initialHeap(), refParamIndexes(), getMaxLocals());
-		new State();
+		new State(createInitialLocalVars());
 
 
 
@@ -12,7 +12,7 @@ aspect State {
 	coll Set<State> Instruction.statesIn() circular [new HashSet<State>()] with addAll root Method;
 	Instruction contributes statesOut() to Instruction.statesIn() for each succ();
 
-	syn Set<State> EntryPoint.statesIn() = Collections.singleton(method().createState());
+	syn Set<State> EntryPoint.statesIn() = Collections.singleton(method().createInitialState());
 	
 
 		
