@@ -4,21 +4,20 @@ aspect LocalVars {
 	
 	syn LocalVars Method.createInitialLocalVars() {
 		LocalVars result = new LocalVars(getMaxLocals());
-//		int index = 0;
-		
-//		for ( Type arg : getArgs() ) 
-//			if ( arg instanceof PrimitiveType ) 
-//				for (int i = 0; i < ((PrimitiveType)arg).getSize(); i++ ) 
-//					result = result.set(index++, PrimitiveSlot.INSTANCE);
-//			else 
-//				result = result.set(index++, arg);		
+
+		int index = 0;		
+		for ( Type arg : getArgs() ) 
+			if ( arg instanceof PrimitiveType ) 
+				index += ((PrimitiveType) arg).getSize();
+			else 
+				result = result.set(index++, arg);		
 		
 		return result;
 	}
 	
-	syn LocalVars Instruction.transferLocalVars(LocalVars localVarsIn, Slot slot) = localVarsIn;
+	syn LocalVars Instruction.transferLocalVars(LocalVars localVarsIn, Type slot) = localVarsIn;
 	
-	eq StoreInstruction.transferLocalVars(LocalVars localVarsIn, Slot slot) 
+	eq StoreInstruction.transferLocalVars(LocalVars localVarsIn, Type slot) 
 		= localVarsIn.set(getIndex(), slot);	
 	
 	
