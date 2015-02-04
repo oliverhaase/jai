@@ -2,8 +2,7 @@
 aspect State {
 
 	syn State Method.createInitialState() =
-//		new State(initialHeap(), refParamIndexes(), getMaxLocals());
-		new State(createInitialLocalVars());
+		new State(createInitialLocalVars(), createInitialOpStack());
 
 
 
@@ -37,17 +36,13 @@ aspect State {
 	// transfer attribute
 	
 	syn State Instruction.transferState(State stateIn) {
-		return new State(transferLocalVars(stateIn.getLocalVars(), null) 
-//			transferOpStack(stateIn.getOpStack()), 
-//			transferEdges(stateIn.getEdges())
-		);
+		return new State(transferLocalVars(stateIn.getLocalVars(), null),
+				transferOpStack(stateIn.getOpStack(), null)); 	
 	}
 	
 	eq StoreInstruction.transferState(State stateIn) {
-		return new State(transferLocalVars(stateIn.getLocalVars(), stateIn.getOpStack().peek()) 
-//			transferOpStack(stateIn.getOpStack()), 
-//			transferEdges(stateIn.getEdges())
-		);
+		return new State(transferLocalVars(stateIn.getLocalVars(), stateIn.getOpStack().peek()),
+				transferOpStack(stateIn.getOpStack(), null));
 	}
 	
 	

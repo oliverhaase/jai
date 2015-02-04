@@ -10,6 +10,7 @@ import org.apache.bcel.classfile.JavaClass;
 
 import de.htwg_konstanz.jai.vm.State;
 import de.htwg_konstanz.jai.vm.LocalVars;
+import de.htwg_konstanz.jai.vm.OpStack;
 import de.htwg_konstanz.jai.vm.Slot;
 import de.htwg_konstanz.jai.vm.PrimitiveSlot;
 

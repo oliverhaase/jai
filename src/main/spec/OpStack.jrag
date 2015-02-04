@@ -1,0 +1,11 @@
+
+aspect OpStack {
+	
+	syn OpStack Method.createInitialOpStack() {
+		return new OpStack();
+	}
+	
+	syn OpStack Instruction.transferOpStack(OpStack opStackIn, Type slot) = opStackIn;
+		
+	
+}
