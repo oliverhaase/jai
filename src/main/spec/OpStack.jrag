@@ -5,7 +5,28 @@ aspect OpStack {
 		return new OpStack();
 	}
 	
-	syn OpStack Instruction.transferOpStack(OpStack opStackIn, Type slot) = opStackIn;
+	syn OpStack Instruction.transferOpStack(OpStack opStackIn, Type slot) = 
+		( getProduceStack() > getConsumeStack() ) ? 
+		opStackIn.push(PrimitiveSlot.getInstance(), getProduceStack() - getConsumeStack()) :
+		opStackIn.pop(getConsumeStack() - getProduceStack());
 		
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 }
