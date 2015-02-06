@@ -10,14 +10,14 @@ aspect LocalVars {
 			if ( arg instanceof PrimitiveType ) 
 				index += ((PrimitiveType) arg).getSize();
 			else 
-				result = result.set(index++, arg);		
+				result = result.set(index++, new ReferenceSlot((ReferenceType) arg));		
 		
 		return result;
 	}
 	
-	syn LocalVars Instruction.transferLocalVars(LocalVars localVarsIn, Type slot) = localVarsIn;
+	syn LocalVars Instruction.transferLocalVars(LocalVars localVarsIn, Slot slot) = localVarsIn;
 	
-	eq StoreInstruction.transferLocalVars(LocalVars localVarsIn, Type slot) 
+	eq StoreInstruction.transferLocalVars(LocalVars localVarsIn, Slot slot) 
 		= localVarsIn.set(getIndex(), slot);	
 	
 	

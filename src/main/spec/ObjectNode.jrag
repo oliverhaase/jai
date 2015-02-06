@@ -1,0 +1,4 @@
+aspect ObjectNode {
+	ReferenceType implements ObjectNode;
+	NewInstruction implements ObjectNode;
+}

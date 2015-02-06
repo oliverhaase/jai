@@ -5,17 +5,16 @@ import javax.annotation.CheckReturnValue;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import net.jcip.annotations.Immutable;
-import de.htwg_konstanz.jai.gen.Type;
 
 @Immutable
 @EqualsAndHashCode
 public final class OpStack {
-	private final Type top;
+	private final Slot top;
 	private final OpStack rest;
 
 	private final static OpStack emptyStack = new OpStack(null, null);
 
-	private OpStack(Type top, OpStack rest) {
+	private OpStack(Slot top, OpStack rest) {
 		this.top = top;
 		this.rest = rest;
 	}
@@ -25,12 +24,12 @@ public final class OpStack {
 	}
 
 	@CheckReturnValue
-	public OpStack push(@NonNull Type slot) {
+	public OpStack push(@NonNull Slot slot) {
 		return new OpStack(slot, this);
 	}
 
 	@CheckReturnValue
-	public OpStack push(Type slot, int n) {
+	public OpStack push(Slot slot, int n) {
 		OpStack result = this;
 		for (int i = 0; i < n; i++)
 			result = result.push(slot);
@@ -50,7 +49,7 @@ public final class OpStack {
 		return result;
 	}
 
-	public Type top() {
+	public Slot top() {
 		return top;
 	}
 

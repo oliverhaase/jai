@@ -1,8 +1,7 @@
 package de.htwg_konstanz.jai.vm;
 
-import de.htwg_konstanz.jai.gen.Type;
 
-public class PrimitiveSlot extends Type {
+public class PrimitiveSlot implements Slot {
 	private static PrimitiveSlot instance = new PrimitiveSlot();
 
 	private PrimitiveSlot() {

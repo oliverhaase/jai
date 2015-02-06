@@ -6,32 +6,31 @@ import javax.annotation.CheckReturnValue;
 
 import lombok.EqualsAndHashCode;
 import net.jcip.annotations.Immutable;
-import de.htwg_konstanz.jai.gen.Type;
 
 @Immutable
 @EqualsAndHashCode
 public class LocalVars {
-	private final Type[] vars;
+	private final Slot[] vars;
 
 	public LocalVars(int maxLocals) {
-		vars = new Type[maxLocals];
-		for (Type var : vars)
+		vars = new Slot[maxLocals];
+		for (Slot var : vars)
 			var = PrimitiveSlot.getInstance();
 	}
 
 	private LocalVars(LocalVars original) {
-		vars = new Type[original.vars.length];
+		vars = new Slot[original.vars.length];
 
 		for (int i = 0; i < vars.length; i++)
 			vars[i] = original.vars[i];
 	}
 
-	public Type get(int index) {
+	public Slot get(int index) {
 		return vars[index];
 	}
 
 	@CheckReturnValue
-	public LocalVars set(int index, Type slot) {
+	public LocalVars set(int index, Slot slot) {
 		LocalVars result = new LocalVars(this);
 		result.vars[index] = slot;
 		return result;

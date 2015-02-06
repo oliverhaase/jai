@@ -13,6 +13,8 @@ import de.htwg_konstanz.jai.vm.LocalVars;
 import de.htwg_konstanz.jai.vm.OpStack;
 import de.htwg_konstanz.jai.vm.Slot;
 import de.htwg_konstanz.jai.vm.PrimitiveSlot;
+import de.htwg_konstanz.jai.vm.ReferenceSlot;
+import de.htwg_konstanz.jai.vm.ObjectNode;
 
 
 aspect Imports {

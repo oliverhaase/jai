@@ -5,42 +5,42 @@ aspect OpStack {
 		return OpStack.getEmptyStack();
 	}
 	
-	syn OpStack Instruction.transferOpStack(OpStack opStackIn, Type slot) = 
+	syn OpStack Instruction.transferOpStack(OpStack opStackIn, Slot slot) = 
 		getProduceStack() == getConsumeStack()  ?
 			opStackIn :
 			getProduceStack() > getConsumeStack()  ? 
 				opStackIn.push(PrimitiveSlot.getInstance(), getProduceStack() - getConsumeStack()) :
 				opStackIn.pop(getConsumeStack() - getProduceStack());
 		
-	eq ArrayLength.transferOpStack(OpStack opStackIn, Type slot) = 
+	eq ArrayLength.transferOpStack(OpStack opStackIn, Slot slot) = 
 		opStackIn.pop().push(PrimitiveSlot.getInstance());
 		
-	eq Athrow.transferOpStack(OpStack opStackIn, Type slot) =
+	eq Athrow.transferOpStack(OpStack opStackIn, Slot slot) =
 		opStackIn.pop(getConsumeStack()).push(opStackIn.top()); 		
 
-	eq FieldAssignmentInstruction.transferOpStack(OpStack opStackIn, Type slot) = 
+	eq FieldAssignmentInstruction.transferOpStack(OpStack opStackIn, Slot slot) = 
 		opStackIn.pop(getConsumeStack());
 		
-	eq FieldLoadInstruction.transferOpStack(OpStack opStackIn, Type slot) =
+	eq FieldLoadInstruction.transferOpStack(OpStack opStackIn, Slot slot) =
 		opStackIn.pop(getConsumeStack()).push(slot, getProduceStack());
 		
 		
 	
-	eq DUP.transferOpStack(OpStack opStackIn, Type slot) = opStackIn.push(opStackIn.top());
+	eq DUP.transferOpStack(OpStack opStackIn, Slot slot) = opStackIn.push(opStackIn.top());
 
-	eq DUP_X1.transferOpStack(OpStack opStackIn, Type slot) = 
+	eq DUP_X1.transferOpStack(OpStack opStackIn, Slot slot) = 
 		opStackIn.pop().pop().push(opStackIn.top()).push(opStackIn.pop().top()).push(opStackIn.top());
 
-	eq DUP_X2.transferOpStack(OpStack opStackIn, Type slot) = 
+	eq DUP_X2.transferOpStack(OpStack opStackIn, Slot slot) = 
 		opStackIn.pop().pop().pop().push(opStackIn.top())
 						.push(opStackIn.pop().pop().top())
 						.push(opStackIn.pop().top())
 						.push(opStackIn.top());
 	
-	eq DUP2.transferOpStack(OpStack opStackIn, Type slot) =
+	eq DUP2.transferOpStack(OpStack opStackIn, Slot slot) =
 		opStackIn.push(opStackIn.pop().top()).push(opStackIn.top());
 	
-	eq DUP2_X1.transferOpStack(OpStack opStackIn, Type slot) =
+	eq DUP2_X1.transferOpStack(OpStack opStackIn, Slot slot) =
 		opStackIn.pop().pop().pop()
 						.push(opStackIn.pop().top())
 						.push(opStackIn.top())
@@ -48,7 +48,7 @@ aspect OpStack {
 						.push(opStackIn.pop().top())
 						.push(opStackIn.top());
 	
-	eq DUP2_X2.transferOpStack(OpStack opStackIn, Type slot) =
+	eq DUP2_X2.transferOpStack(OpStack opStackIn, Slot slot) =
 		 opStackIn.pop().pop().pop().pop()
 						.push(opStackIn.pop().top())
 						.push(opStackIn.top())
@@ -57,7 +57,7 @@ aspect OpStack {
 						.push(opStackIn.pop().top())
 						.push(opStackIn.top());
 
-	eq SWAP.transferOpStack(OpStack opStackIn, Type slot) = 
+	eq SWAP.transferOpStack(OpStack opStackIn, Slot slot) = 
 		opStackIn.pop().pop().push(opStackIn.top()).push(opStackIn.pop().top());
 		
 	
