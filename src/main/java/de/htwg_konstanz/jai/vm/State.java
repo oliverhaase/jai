@@ -9,11 +9,6 @@ public final class State {
 		this.opStack = opStack;
 	}
 
-	public Object getEdges() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public OpStack getOpStack() {
 		return opStack;
 	}
