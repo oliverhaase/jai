@@ -2,18 +2,251 @@
 aspect OpStack {
 	
 	syn OpStack Method.createInitialOpStack() {
-		return new OpStack();
+		return OpStack.getEmptyStack();
 	}
 	
 	syn OpStack Instruction.transferOpStack(OpStack opStackIn, Type slot) = 
-		( getProduceStack() > getConsumeStack() ) ? 
-		opStackIn.push(PrimitiveSlot.getInstance(), getProduceStack() - getConsumeStack()) :
-		opStackIn.pop(getConsumeStack() - getProduceStack());
+		getProduceStack() == getConsumeStack()  ?
+			opStackIn :
+			getProduceStack() > getConsumeStack()  ? 
+				opStackIn.push(PrimitiveSlot.getInstance(), getProduceStack() - getConsumeStack()) :
+				opStackIn.pop(getConsumeStack() - getProduceStack());
 		
+	syn OpStack ArrayLength.transferOpStack(OpStack opStackIn, Type slot) = 
+		opStackIn.pop().push(PrimitiveSlot.getInstance());
+
+	syn OpStack FieldAssignmentInstruction.transferOpStack(OpStack opStackIn, Type slot) = 
+		opStackIn.pop(getConsumeStack());
+	
+	syn OpStack DUP.transferOpStack(OpStack opStackIn, Type slot) = opStackIn.push(opStackIn.top());
+
+	syn OpStack DUP_X1.transferOpStack(OpStack opStackIn, Type slot) = 
+		opStackIn.pop().pop().push(opStackIn.top()).push(opStackIn.pop().top()).push(opStackIn.top());
+
+
 	
 	
+/*
+
+	
+	eq Athrow.statesOut() =
+		States.processStates(statesIn(), new StateProcessor() {
+			@Override public State process(State original) {
+				return new State(
+					original.getLocalVars(), 
+					original.getOpStack().pop(getConsumeStack()).push(original.getOpStack().top()), 
+					original.getHeap()); 
+			}
+		});		
 	
 	
+	eq AconstNull.statesOut() =
+		States.processStates(statesIn(), new StateProcessor() {
+			@Override public State process(State original) {
+				Heap heap = original.getHeap();
+				ReferenceNode ref = new ReferenceNode(getPosition(), Category.LOCAL);
+				heap = heap.addReferenceAndTarget(ref, InternalObject.getNullObject()); 
+				return new State(
+					original.getLocalVars(), 
+					original.getOpStack().pop(getConsumeStack()).push(ref), 
+					heap); 
+			}
+		});
+	
+
+	
+	
+	syn ReferenceNode FieldLoadInstruction.getLoadObjectRef(State frame) = null;
+	syn ReferenceNode GetField.getLoadObjectRef(State frame) =
+		(ReferenceNode) frame.getOpStack().get(frame.getOpStack().size() -1);
+	syn ReferenceNode Aaload.getLoadObjectRef(State frame) =
+		(ReferenceNode) frame.getOpStack().get(frame.getOpStack().size() -2);		
+	syn ReferenceNode GetStatic.getLoadObjectRef(State frame) = ReferenceNode.getGlobalRef();
+	
+	eq FieldLoadInstruction.statesOut() =
+		// notation: load obj.field 
+		States.processStates(statesIn(), new StateProcessor() {
+			@Override public State process(State original) {
+				OpStack opStack = original.getOpStack();
+				Heap heap = original.getHeap();
+				Slot result;
+				
+				if ( getFieldType() instanceof org.apache.bcel.generic.ReferenceType ) {
+					result = new ReferenceNode(getPosition(), Category.LOCAL);
+					Set<ObjectNode> allTargets = new HashSet<ObjectNode>();
+
+					for ( ObjectNode obj :  heap.dereference(getLoadObjectRef(original))) {
+						Set<ObjectNode> targets 
+							= heap.getObjectNodes().getFieldOf(obj, heap.getFieldEdges(), getFieldName());
+						if ( targets.isEmpty() ) {
+							ObjectNode subObject = 
+								PhantomObject.newSubPhantom(obj, getFieldName());
+							heap = heap.addField(obj, getFieldName(), subObject);
+							targets.add(subObject);
+						}
+						allTargets.addAll(targets);
+					}
+							
+					heap = heap.addReferenceToTargets((ReferenceNode) result, allTargets);
+					
+				} else 
+					result = DontCareSlot.values()[getProduceStack()];					
+					
+				return new State(
+					original.getLocalVars(), 
+					opStack.pop(getConsumeStack()).push(result, getProduceStack()), 
+					heap);									
+			}
+		});	
+
+	eq Ldc.statesOut() =
+		States.processStates(statesIn(), new StateProcessor() {
+			@Override public State process(State original) {			
+				return new State(
+					original.getLocalVars(), 
+					original.getOpStack().push(
+						(getConstantType() instanceof org.apache.bcel.generic.ReferenceType ) ? 
+						ReferenceNode.getGlobalRef() 
+						: DontCareSlot.NORMAL_SLOT), 
+					original.getHeap());
+			}
+		});	
+
+			
+	eq NewInstruction.statesOut() =
+		States.processStates(statesIn(), new StateProcessor() {
+			@Override public State process(State original) {
+				Heap heap = original.getHeap();
+				
+				ObjectNode obj = new InternalObject(
+					method().clazz().getName() + "." 
+						+ method().getMethodName() + "|"
+						+ method().getSignatureIndex() + ":"
+						+ getPosition(), 
+					getType(), 
+					ClassHelper.isRunnable(getType()) ? EscapeState.GLOBAL_ESCAPE : EscapeState.NO_ESCAPE);
+					
+				ReferenceNode ref = new ReferenceNode(getPosition(), Category.LOCAL);
+				heap = heap.addReferenceAndTarget(ref, obj); 
+				return new State(
+					original.getLocalVars(), 
+					original.getOpStack().pop(getConsumeStack()).push(ref), 
+					heap); 
+			}
+		});
+	
+	eq InvokeInstruction.statesOut() {
+		Set<State> result = new HashSet<State>();
+
+		for ( State frameIn : statesIn() ) 
+			for ( Method targetMethod : resolveTargetMethod() ) 
+				result.add(frameIn.applyMethodSummary(
+					targetMethod.methodSummary(), 
+					getConsumeStack(), 
+					getProduceStack(), 
+					getReturnType(),
+					getPosition()));
+					
+		return result;
+	}	
+		
+	eq LoadInstruction.statesOut() =
+		States.processStates(statesIn(), new StateProcessor() {
+			@Override public State process(State original) {
+				return new State(
+					original.getLocalVars(), 
+					original.getOpStack().push(original.getLocalVars().get(getIndex()), 
+						getProduceStack()), 
+					original.getHeap());
+			}
+		});
+	
+	eq StoreInstruction.statesOut() =
+		States.processStates(statesIn(), new StateProcessor() {
+			@Override public State process(State original) {
+				return new State(
+					original.getLocalVars().set(getIndex(), original.getOpStack().peek()), 
+					original.getOpStack().pop(getConsumeStack()), 
+					original.getHeap());
+			}
+		});
+	
+
+	
+
+	
+	eq DUP_X2.statesOut() =
+		States.processStates(statesIn(), new StateProcessor() {
+			@Override public State process(State original) {				
+				return new State(
+					original.getLocalVars(), 
+					original.getOpStack().pop().pop().pop().push(original.getOpStack().peek())
+						.push(original.getOpStack().pop().pop().peek())
+						.push(original.getOpStack().pop().peek())
+						.push(original.getOpStack().peek()), 
+					original.getHeap());
+			}
+		});
+	
+	eq DUP2.statesOut() =
+		States.processStates(statesIn(), new StateProcessor() {
+			@Override public State process(State original) {
+				return new State(
+					original.getLocalVars(), 
+					original.getOpStack().push(original.getOpStack().pop().peek())
+						.push(original.getOpStack().peek()), 
+					original.getHeap());
+			}
+		});
+	
+	eq DUP2_X1.statesOut() =
+		States.processStates(statesIn(), new StateProcessor() {
+			@Override public State process(State original) {
+				return new State(
+					original.getLocalVars(), 
+					original.getOpStack().pop().pop().pop()
+						.push(original.getOpStack().pop().peek())
+						.push(original.getOpStack().peek())
+						.push(original.getOpStack().pop().pop().peek())
+						.push(original.getOpStack().pop().peek())
+						.push(original.getOpStack().peek()), 
+					original.getHeap());
+			}
+		});
+	
+	eq DUP2_X2.statesOut() =
+		 States.processStates(statesIn(), new StateProcessor() {
+			@Override public State process(State original) {
+				return new State(
+					original.getLocalVars(), 
+					original.getOpStack().pop().pop().pop().pop()
+						.push(original.getOpStack().pop().peek())
+						.push(original.getOpStack().peek())
+						.push(original.getOpStack().pop().pop().pop().peek())
+						.push(original.getOpStack().pop().pop().peek())
+						.push(original.getOpStack().pop().peek())
+						.push(original.getOpStack().peek()), 
+					original.getHeap());
+			}
+		});
+	
+	eq SWAP.statesOut() =
+		States.processStates(statesIn(), new StateProcessor() {
+			@Override public State process(State original) {
+				return new State(
+					original.getLocalVars(), 
+					original.getOpStack().pop().pop()
+						.push(original.getOpStack().peek())
+						.push(original.getOpStack().pop().peek()), 
+					original.getHeap());
+			}
+		});
+	
+	eq ReturnInstruction.statesOut() = null;
+	eq Areturn.statesOut() = null;	
+	
+	
+*/	
 	
 	
 	

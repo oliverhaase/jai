@@ -1,7 +1,5 @@
 package de.htwg_konstanz.jai.vm;
 
-import java.util.Stack;
-
 import javax.annotation.CheckReturnValue;
 
 import lombok.EqualsAndHashCode;
@@ -12,27 +10,28 @@ import de.htwg_konstanz.jai.gen.Type;
 @Immutable
 @EqualsAndHashCode
 public final class OpStack {
-	private final Stack<Type> stack;
+	private final Type top;
+	private final OpStack rest;
 
-	public OpStack() {
-		stack = new Stack<Type>();
+	private final static OpStack emptyStack = new OpStack(null, null);
+
+	private OpStack(Type top, OpStack rest) {
+		this.top = top;
+		this.rest = rest;
 	}
 
-	private OpStack(@NonNull OpStack original) {
-		this.stack = new Stack<Type>();
-		stack.addAll(original.stack);
+	public static OpStack getEmptyStack() {
+		return emptyStack;
 	}
 
 	@CheckReturnValue
 	public OpStack push(@NonNull Type slot) {
-		OpStack result = new OpStack(this);
-		result.stack.push(slot);
-		return result;
+		return new OpStack(slot, this);
 	}
 
 	@CheckReturnValue
 	public OpStack push(Type slot, int n) {
-		OpStack result = new OpStack(this);
+		OpStack result = this;
 		for (int i = 0; i < n; i++)
 			result = result.push(slot);
 		return result;
@@ -40,20 +39,19 @@ public final class OpStack {
 
 	@CheckReturnValue
 	public OpStack pop() {
-		OpStack result = new OpStack(this);
-		result.stack.pop();
-		return result;
+		return rest;
 	}
 
 	@CheckReturnValue
 	public OpStack pop(int n) {
-		OpStack result = new OpStack(this);
+		OpStack result = this;
 		for (int i = 0; i < n; i++)
 			result = result.pop();
 		return result;
 	}
 
-	public Type peek() {
-		return stack.peek();
+	public Type top() {
+		return top;
 	}
+
 }

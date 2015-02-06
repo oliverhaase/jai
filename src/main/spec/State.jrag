@@ -41,7 +41,7 @@ aspect State {
 	}
 	
 	eq StoreInstruction.transferState(State stateIn) {
-		return new State(transferLocalVars(stateIn.getLocalVars(), stateIn.getOpStack().peek()),
+		return new State(transferLocalVars(stateIn.getLocalVars(), stateIn.getOpStack().top()),
 				transferOpStack(stateIn.getOpStack(), null));
 	}
 	
