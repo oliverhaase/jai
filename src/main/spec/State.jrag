@@ -2,8 +2,8 @@
 aspect State {
 
 	syn State Method.createInitialState() =
-		new State(createInitialLocalVars(), createInitialOpStack());
-
+		new State(createInitialLocalVars(), createInitialOpStack(),
+			createInitialFieldEdges());
 
 
 	// set of incoming states, statesIn() 	
@@ -13,7 +13,6 @@ aspect State {
 
 	syn Set<State> EntryPoint.statesIn() = Collections.singleton(method().createInitialState());
 	
-
 		
 	// set of outgoing states, statesOut()
 	
@@ -37,14 +36,21 @@ aspect State {
 	
 	syn State Instruction.transferState(State stateIn) {
 		return new State(transferLocalVars(stateIn.getLocalVars(), null),
-				transferOpStack(stateIn.getOpStack(), null)); 	
+				transferOpStack(stateIn.getOpStack(), null),
+				transferFieldEdges(stateIn.getFieldEdges())); 	
 	}
-	
+		
 	eq StoreInstruction.transferState(State stateIn) {
 		return new State(transferLocalVars(stateIn.getLocalVars(), stateIn.getOpStack().top()),
-				transferOpStack(stateIn.getOpStack(), null));
+				transferOpStack(stateIn.getOpStack(), null),
+				transferFieldEdges(stateIn.getFieldEdges()));
 	}
 	
+	eq LoadInstruction.transferState(State stateIn) {
+		return new State(transferLocalVars(stateIn.getLocalVars(), null),
+				transferOpStack(stateIn.getOpStack(), stateIn.getLocalVars().get(getIndex())),
+				transferFieldEdges(stateIn.getFieldEdges()));
+	}
 	
 	
 	
