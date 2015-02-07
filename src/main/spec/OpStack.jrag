@@ -24,8 +24,12 @@ aspect OpStack {
 	eq FieldLoadInstruction.transferOpStack(OpStack opStackIn, Slot slot) =
 		opStackIn.pop(getConsumeStack()).push(slot, getProduceStack());
 		
+	eq NewInstruction.transferOpStack(OpStack opStackIn, Slot slot) =
+		opStackIn.pop(getConsumeStack()).push(new ReferenceSlot(this));	
 		
-	
+	eq LoadInstruction.transferOpStack(OpStack opStackIn, Slot slot) =
+		opStackIn.push(slot, getProduceStack());
+			
 	eq DUP.transferOpStack(OpStack opStackIn, Slot slot) = opStackIn.push(opStackIn.top());
 
 	eq DUP_X1.transferOpStack(OpStack opStackIn, Slot slot) = 
@@ -64,8 +68,6 @@ aspect OpStack {
 /*
 
 	
-
-	
 	
 	eq AconstNull.statesOut() =
 		States.processStates(statesIn(), new StateProcessor() {
@@ -96,29 +98,7 @@ aspect OpStack {
 			}
 		});	
 
-			
-	eq NewInstruction.statesOut() =
-		States.processStates(statesIn(), new StateProcessor() {
-			@Override public State process(State original) {
-				Heap heap = original.getHeap();
 				
-				ObjectNode obj = new InternalObject(
-					method().clazz().getName() + "." 
-						+ method().getMethodName() + "|"
-						+ method().getSignatureIndex() + ":"
-						+ getPosition(), 
-					getType(), 
-					ClassHelper.isRunnable(getType()) ? EscapeState.GLOBAL_ESCAPE : EscapeState.NO_ESCAPE);
-					
-				ReferenceNode ref = new ReferenceNode(getPosition(), Category.LOCAL);
-				heap = heap.addReferenceAndTarget(ref, obj); 
-				return new State(
-					original.getLocalVars(), 
-					opStackIn.pop(getConsumeStack()).push(ref), 
-					heap); 
-			}
-		});
-	
 	eq InvokeInstruction.statesOut() {
 		Set<State> result = new HashSet<State>();
 
@@ -134,36 +114,6 @@ aspect OpStack {
 		return result;
 	}	
 		
-	eq LoadInstruction.statesOut() =
-		States.processStates(statesIn(), new StateProcessor() {
-			@Override public State process(State original) {
-				return new State(
-					original.getLocalVars(), 
-					opStackIn.push(original.getLocalVars().get(getIndex()), 
-						getProduceStack()), 
-					original.getHeap());
-			}
-		});
-	
-	eq StoreInstruction.statesOut() =
-		States.processStates(statesIn(), new StateProcessor() {
-			@Override public State process(State original) {
-				return new State(
-					original.getLocalVars().set(getIndex(), opStackIn.peek()), 
-					opStackIn.pop(getConsumeStack()), 
-					original.getHeap());
-			}
-		});
-	
-
-	
-
-
-	
-	
-	eq ReturnInstruction.statesOut() = null;
-	eq Areturn.statesOut() = null;	
-	
 	
 */	
 	
