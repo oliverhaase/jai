@@ -17,9 +17,6 @@ aspect OpStack {
 		
 	eq Athrow.transferOpStack(OpStack opStackIn, Slot slot) =
 		opStackIn.pop(getConsumeStack()).push(opStackIn.top()); 		
-
-	eq FieldAssignmentInstruction.transferOpStack(OpStack opStackIn, Slot slot) = 
-		opStackIn.pop(getConsumeStack());
 		
 	eq FieldLoadInstruction.transferOpStack(OpStack opStackIn, Slot slot) =
 		opStackIn.pop(getConsumeStack()).push(slot, getProduceStack());
