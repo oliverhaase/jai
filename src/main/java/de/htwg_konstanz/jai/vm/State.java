@@ -1,5 +1,10 @@
 package de.htwg_konstanz.jai.vm;
 
+import lombok.EqualsAndHashCode;
+import net.jcip.annotations.Immutable;
+
+@Immutable
+@EqualsAndHashCode
 public final class State {
 	private final LocalVars localVars;
 	private final OpStack opStack;
