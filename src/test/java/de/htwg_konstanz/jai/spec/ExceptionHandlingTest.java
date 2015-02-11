@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -158,7 +159,7 @@ public class ExceptionHandlingTest {
 	}
 
 	@Test
-	public void testCatchTest() throws Exception {
+	public void catchTest() throws Exception {
 		Method method = methods.get("catchTest");
 
 		HashMap<Integer, Instruction> instructions = new HashMap<Integer, Instruction>();
@@ -184,10 +185,15 @@ public class ExceptionHandlingTest {
 			assertEquals(0, exceptionHandler.size());
 		}
 
+		Instruction instruction = instructions.get(9);
+		Iterator<Instruction> successors = instruction.succ().iterator();
+		assertEquals(15, successors.next().getPosition());
+		assertEquals(12, successors.next().getPosition());
+
 	}
 
 	@Test
-	public void testCatch2Test() throws Exception {
+	public void catch2Test() throws Exception {
 		Method method = methods.get("catch2Test");
 		System.out.println("\n" + method);
 		print(method.entryPoint(), "");
@@ -219,7 +225,7 @@ public class ExceptionHandlingTest {
 	}
 
 	@Test
-	public void testCatchFinallyTest() throws Exception {
+	public void catchFinallyTest() throws Exception {
 		Method method = methods.get("catchFinallyTest");
 		System.out.println("\n" + method);
 		print(method.entryPoint(), "");
@@ -228,15 +234,13 @@ public class ExceptionHandlingTest {
 		for (Instruction i : method.getInstructions())
 			instructions.put(i.getPosition(), i);
 
-		final int END_OF_TRY = 5;
-
 		final Integer[] TRY1 = { 4, 5 };
 		final Integer[] TRY2 = { 8, 11, 12, 13 };
 		final Integer[] TRY3 = { 23, 24, 25 };
 		final int CATCH1 = 11;
 		final int CATCH2 = 23;
 		final int FINALLY = 35;
-		final Integer[] NOT_TRY = getNotTry(instructions, new Integer[][] { TRY1, TRY2 });
+		final Integer[] NOT_TRY = getNotTry(instructions, new Integer[][] { TRY1, TRY2, TRY3 });
 
 		for (int instructionPosition : TRY1) {
 			Set<Integer> exceptionHandler = instructions.get(instructionPosition)
@@ -263,25 +267,71 @@ public class ExceptionHandlingTest {
 			assertEquals(1, exceptionHandler.size());
 			assertTrue(exceptionHandler.contains(FINALLY));
 		}
+
+		for (int instructionPosition : NOT_TRY) {
+			Set<Integer> exceptionHandler = instructions.get(instructionPosition)
+					.getExceptionHandlers();
+
+			assertEquals(0, exceptionHandler.size());
+		}
 	}
 
 	@Test
-	public void testFinallyTest() throws Exception {
+	public void finallyTest() throws Exception {
 		Method method = methods.get("finallyTest");
 		System.out.println("\n" + method);
 		print(method.entryPoint(), "");
-
-		final int END_OF_TRY = 8;
-		final int FINALLY = 11;
 
 		HashMap<Integer, Instruction> instructions = new HashMap<Integer, Instruction>();
 		for (Instruction i : method.getInstructions())
 			instructions.put(i.getPosition(), i);
 
-		Set<Integer> exceptionHandler = instructions.get(END_OF_TRY).getExceptionHandlers();
+		final Integer[] TRY1 = { 4, 5, 8 };
+		final int FINALLY = 11;
+		final Integer[] NOT_TRY = getNotTry(instructions, new Integer[][] { TRY1 });
 
-		assertEquals(1, exceptionHandler.size());
-		assertTrue(exceptionHandler.contains(FINALLY));
+		for (int instructionPosition : TRY1) {
+			Set<Integer> exceptionHandler = instructions.get(instructionPosition)
+					.getExceptionHandlers();
+
+			assertEquals(1, exceptionHandler.size());
+			assertTrue(exceptionHandler.contains(FINALLY));
+		}
+
+		for (int instructionPosition : NOT_TRY) {
+			Set<Integer> exceptionHandler = instructions.get(instructionPosition)
+					.getExceptionHandlers();
+
+			assertEquals(0, exceptionHandler.size());
+		}
+	}
+
+	@Test
+	public void throwTest() throws Exception {
+		Method method = methods.get("catchThrowTest");
+
+		HashMap<Integer, Instruction> instructions = new HashMap<Integer, Instruction>();
+		for (Instruction i : method.getInstructions())
+			instructions.put(i.getPosition(), i);
+
+		final Integer[] TRY = { 4, 5 };
+		final Integer[] CATCH = { 6 };
+		final Integer[] NOT_TRY = getNotTry(instructions, TRY);
+
+		for (int instructionPosition : TRY) {
+			Set<Integer> exceptionHandler = instructions.get(instructionPosition)
+					.getExceptionHandlers();
+
+			assertEquals(CATCH.length, exceptionHandler.size());
+			assertTrue(exceptionHandler.contains(CATCH[0]));
+		}
+
+		for (int instructionPosition : NOT_TRY) {
+			Set<Integer> exceptionHandler = instructions.get(instructionPosition)
+					.getExceptionHandlers();
+
+			assertEquals(0, exceptionHandler.size());
+		}
 	}
 
 	private void print(Instruction instruction, String tab) {
