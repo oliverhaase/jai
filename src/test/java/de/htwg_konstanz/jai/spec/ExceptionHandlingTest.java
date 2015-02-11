@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -185,10 +184,10 @@ public class ExceptionHandlingTest {
 			assertEquals(0, exceptionHandler.size());
 		}
 
-		Instruction instruction = instructions.get(9);
-		Iterator<Instruction> successors = instruction.succ().iterator();
-		assertEquals(15, successors.next().getPosition());
-		assertEquals(12, successors.next().getPosition());
+		Set<Instruction> successors = instructions.get(9).succ();
+		assertEquals(2, successors.size());
+		assertTrue(successors.contains(instructions.get(12)));
+		assertTrue(successors.contains(instructions.get(15)));
 
 	}
 
@@ -221,6 +220,12 @@ public class ExceptionHandlingTest {
 
 			assertEquals(0, exceptionHandler.size());
 		}
+
+		Set<Instruction> successors = instructions.get(5).succ();
+		assertEquals(3, successors.size());
+		assertTrue(successors.contains(instructions.get(11)));
+		assertTrue(successors.contains(instructions.get(19)));
+		assertTrue(successors.contains(instructions.get(8)));
 
 	}
 
@@ -332,6 +337,13 @@ public class ExceptionHandlingTest {
 
 			assertEquals(0, exceptionHandler.size());
 		}
+
+		Set<Instruction> successors = instructions.get(5).succ();
+		assertEquals(2, successors.size());
+		assertTrue(successors.contains(instructions.get(6)));
+		Instruction exitPoint = method.getInstructions().getChild(
+				method.getInstructions().getNumChild() - 1);
+		assertTrue(successors.contains(exitPoint));
 	}
 
 	private void print(Instruction instruction, String tab) {
