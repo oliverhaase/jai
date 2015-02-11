@@ -1,9 +1,9 @@
 package de.htwg_konstanz.jai.vm;
 
 import lombok.EqualsAndHashCode;
-import net.jcip.annotations.ThreadSafe;
+import net.jcip.annotations.Immutable;
 
-@ThreadSafe
+@Immutable
 @EqualsAndHashCode
 public final class FieldEdge {
 	private final ObjectNode origin;
