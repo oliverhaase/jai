@@ -68,9 +68,9 @@ public class AstConverter {
 
 			org.apache.bcel.generic.Type returnType = bcelMethod.getReturnType();
 			if (returnType.equals(BasicType.VOID))
-				method.setTypeOrVoid(new Void());
+				method.setReturnType(new Void());
 			else
-				method.setTypeOrVoid(createJastAddType(returnType));
+				method.setReturnType(createJastAddType(returnType));
 
 			clazz.addMethod(method);
 
