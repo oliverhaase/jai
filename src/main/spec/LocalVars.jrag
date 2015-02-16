@@ -6,7 +6,7 @@ aspect LocalVars {
 		LocalVars result = new LocalVars(getMaxLocals());
 
 		int index = 0;		
-		for ( Type arg : getArgs() ) 
+		for ( Type arg : getArguments() ) 
 			if ( arg instanceof PrimitiveType ) 
 				index += ((PrimitiveType) arg).getSize();
 			else 

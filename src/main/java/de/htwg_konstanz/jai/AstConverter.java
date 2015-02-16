@@ -60,11 +60,11 @@ public class AstConverter {
 
 			if (!bcelMethod.isStatic()) {
 				Type thisArgument = new ReferenceType(bcelClass.getClassName());
-				method.addType(thisArgument);
+				method.addArgument(thisArgument);
 			}
 
 			for (org.apache.bcel.generic.Type argType : bcelMethod.getArgumentTypes())
-				method.addType(createJastAddType(argType));
+				method.addArgument(createJastAddType(argType));
 
 			org.apache.bcel.generic.Type returnType = bcelMethod.getReturnType();
 			if (returnType.equals(BasicType.VOID))

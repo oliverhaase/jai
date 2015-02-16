@@ -1,9 +1,6 @@
 aspect MethodSignature {
 
-	syn List<Type> Method.getArgs() = getTypes();
-		
-	syn boolean Method.isVoid() = getReturnType() instanceof Void;
-	
-	syn boolean Method.hasRefReturnType() = getReturnType() instanceof ReferenceType;
+//	syn boolean Method.isVoid() = getReturnType() instanceof Void;	
+//	syn boolean Method.hasRefReturnType() = getReturnType() instanceof ReferenceType;
 		
 }

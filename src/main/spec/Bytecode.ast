@@ -1,11 +1,11 @@
 
 
-Program ::= ByteCodeClass* <GlobalObject:ReferenceType>;
+Program ::= ByteCodeClass* GlobalObject:ReferenceType;
 
 ByteCodeClass ::= <Name:String> <SuperClass:String> <IsFinal:boolean> Method*;
 
 Method ::= <IsAbstract:boolean> <IsNative:boolean> <IsPrivate:boolean> <IsFinal:boolean>
-           <MethodName:String> <SignatureIndex:int> Type* <ReturnType:TypeOrVoid>
+           <MethodName:String> <SignatureIndex:int> Argument:Type* ReturnType:TypeOrVoid
             <MaxLocals:int>  Instruction*;
 
 abstract TypeOrVoid;
