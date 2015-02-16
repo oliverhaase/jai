@@ -26,6 +26,11 @@ aspect OpStack {
 		
 	eq LoadInstruction.transferOpStack(OpStack opStackIn, Slot slot) =
 		opStackIn.push(slot, getProduceStack());
+		
+	eq Ldc.transferOpStack(OpStack opStackIn, Slot slot) =
+		opStackIn.push(getConstantType() instanceof org.apache.bcel.generic.ReferenceType ?
+						new ReferenceSlot(getGlobalObject()) :
+						PrimitiveSlot.getInstance());		
 			
 	eq DUP.transferOpStack(OpStack opStackIn, Slot slot) = opStackIn.push(opStackIn.top());
 
@@ -79,21 +84,6 @@ aspect OpStack {
 			}
 		});
 	
-
-	
-
-	eq Ldc.statesOut() =
-		States.processStates(statesIn(), new StateProcessor() {
-			@Override public State process(State original) {			
-				return new State(
-					original.getLocalVars(), 
-					opStackIn.push(
-						(getConstantType() instanceof org.apache.bcel.generic.ReferenceType ) ? 
-						ReferenceNode.getGlobalRef() 
-						: DontCareSlot.NORMAL_SLOT), 
-					original.getHeap());
-			}
-		});	
 
 				
 	eq InvokeInstruction.statesOut() {
