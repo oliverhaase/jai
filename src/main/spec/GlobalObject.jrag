@@ -1,0 +1,6 @@
+aspect GlobalObject {
+
+	syn ReferenceType ByteCodeClass.getGlobalObject() = program().getGlobalObject();
+	syn ReferenceType Method.getGlobalObject() = clazz().getGlobalObject();
+	syn ReferenceType Instruction.getGlobalObject() = method().getGlobalObject();		
+}
