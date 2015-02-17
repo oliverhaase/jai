@@ -11,9 +11,14 @@ import net.jcip.annotations.Immutable;
 @Immutable
 @EqualsAndHashCode
 public final class FieldEdges {
+	private static final FieldEdges EMPTY_FIELDEDGES = new FieldEdges();
 	private final Set<FieldEdge> edges;
 
-	public FieldEdges() {
+	public static FieldEdges getInstance() {
+		return EMPTY_FIELDEDGES;
+	}
+
+	private FieldEdges() {
 		edges = new HashSet<>();
 	}
 
@@ -33,6 +38,15 @@ public final class FieldEdges {
 		FieldEdges result = new FieldEdges(this);
 		result.edges.addAll(fieldEdges);
 		return result;
+	}
+
+	public Set<ObjectNode> getObjectsOfField(ObjectNode obj, String fieldName) {
+		HashSet<ObjectNode> objects = new HashSet<ObjectNode>();
+		for (FieldEdge fieldEdge : edges) {
+			if (fieldEdge.getOrigin().equals(obj) && fieldEdge.getName().equals(fieldName))
+				objects.add(fieldEdge.getDestination());
+		}
+		return objects;
 	}
 
 }

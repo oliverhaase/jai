@@ -12,15 +12,20 @@ import net.jcip.annotations.Immutable;
 @Immutable
 @EqualsAndHashCode
 public final class ReferenceSlot implements Slot {
+	private static final ReferenceSlot EMPTY_REFERNCE_SLOT = new ReferenceSlot();
 	private final Set<ObjectNode> objectNodes;
+
+	private ReferenceSlot() {
+		objectNodes = new HashSet<>();
+	}
+
+	public static ReferenceSlot getInstance() {
+		return EMPTY_REFERNCE_SLOT;
+	}
 
 	public ReferenceSlot(ObjectNode objectNode) {
 		objectNodes = new HashSet<>();
 		objectNodes.add(objectNode);
-	}
-
-	public ReferenceSlot(Set<ObjectNode> objectNodes) {
-		this.objectNodes = new HashSet<>(objectNodes);
 	}
 
 	private ReferenceSlot(ReferenceSlot original) {
@@ -31,6 +36,13 @@ public final class ReferenceSlot implements Slot {
 	public ReferenceSlot addObject(ObjectNode objectNode) {
 		ReferenceSlot result = new ReferenceSlot(this);
 		result.objectNodes.add(objectNode);
+		return result;
+	}
+
+	@CheckReturnValue
+	public ReferenceSlot addObjects(Set<ObjectNode> objectNodes) {
+		ReferenceSlot result = new ReferenceSlot(this);
+		result.objectNodes.addAll(objectNodes);
 		return result;
 	}
 
