@@ -28,4 +28,11 @@ public final class FieldEdges {
 		return result;
 	}
 
+	@CheckReturnValue
+	public FieldEdges addAll(Set<FieldEdge> fieldEdges) {
+		FieldEdges result = new FieldEdges(this);
+		result.edges.addAll(fieldEdges);
+		return result;
+	}
+
 }

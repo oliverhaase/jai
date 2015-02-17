@@ -15,13 +15,14 @@ aspect FieldEdges {
         // notation: obj.field = value
         Slot value = opStack.top();
 
-        FieldEdges result = fieldEdgesIn;
-        if (value instanceof ReferenceSlot)
-            for (ObjectNode obj : getStoreObjectRef(opStack).getReferences())
-                for (ObjectNode referredValue : ((ReferenceSlot) value).getReferences())
-                    result = result.add(new FieldEdge(obj, getFieldName(), referredValue));
+        HashSet<FieldEdge> fieldEdges = new HashSet<FieldEdge>();
 
-        return result;
+        if (value instanceof ReferenceSlot)
+            for (ObjectNode obj : getStoreObjectRef(opStack).getObjects())
+                for (ObjectNode referredValue : ((ReferenceSlot) value).getObjects())
+                    fieldEdges.add(new FieldEdge(obj, getFieldName(), referredValue));
+
+        return fieldEdgesIn.addAll(fieldEdges);
     }
 
 	
