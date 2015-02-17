@@ -15,4 +15,9 @@ public class ReferenceSlot implements Slot {
 		objectNodes.add(objectNode);
 	}
 
+	public Set<ObjectNode> getReferences() {
+		return new HashSet<ObjectNode>(objectNodes); // ObjectNode immutable
+														// (deepCopy / clone)
+	}
+
 }

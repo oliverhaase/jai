@@ -3,8 +3,27 @@ aspect FieldEdges {
 	
 	syn FieldEdges Method.createInitialFieldEdges() = new FieldEdges();
 		
-	syn FieldEdges Instruction.transferFieldEdges(FieldEdges fieldEdgesIn) = fieldEdgesIn;
+	syn FieldEdges Instruction.transferFieldEdges(FieldEdges fieldEdgesIn, OpStack opStack) = fieldEdgesIn;
 	
+
+	syn ReferenceSlot FieldAssignmentInstruction.getStoreObjectRef(OpStack opStack) = null;     
+    syn ReferenceSlot PutField.getStoreObjectRef(OpStack opStack) =  (ReferenceSlot) opStack.pop().top();
+    syn ReferenceSlot Aastore.getStoreObjectRef(OpStack opStack) =   (ReferenceSlot) opStack.pop().pop().top();
+    syn ReferenceSlot PutStatic.getStoreObjectRef(OpStack opStack) = method().clazz().program().getGlobalReference();
+                
+    syn FieldEdges FieldAssignmentInstruction.transferFieldEdges(FieldEdges fieldEdgesIn, OpStack opStack) {
+        // notation: obj.field = value
+        Slot value = opStack.top();
+
+        FieldEdges result = fieldEdgesIn;
+        if (value instanceof ReferenceSlot)
+            for (ObjectNode obj : getStoreObjectRef(opStack).getReferences())
+                for (ObjectNode referredValue : ((ReferenceSlot) value).getReferences())
+                    result = result.add(new FieldEdge(obj, getFieldName(), referredValue));
+
+        return result;
+    }
+
 	
 	/*
 	

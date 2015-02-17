@@ -16,6 +16,7 @@ import de.htwg_konstanz.jai.vm.PrimitiveSlot;
 import de.htwg_konstanz.jai.vm.ReferenceSlot;
 import de.htwg_konstanz.jai.vm.ObjectNode;
 import de.htwg_konstanz.jai.vm.FieldEdges;
+import de.htwg_konstanz.jai.vm.FieldEdge;
 
 
 aspect Imports {
