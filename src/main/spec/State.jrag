@@ -57,7 +57,12 @@ aspect State {
                 transferOpStack(stateIn.getOpStack(), null),
                 transferFieldEdges(stateIn.getFieldEdges(), stateIn.getOpStack()));
     }
-	
-	
+    
+    eq FieldLoadInstruction.transferState(State stateIn) {
+        return new State(transferLocalVars(stateIn.getLocalVars(), null),
+                transferOpStack(stateIn.getOpStack(), getFieldValueSlot(stateIn.getOpStack(), stateIn.getFieldEdges())),
+                transferFieldEdges(stateIn.getFieldEdges(), null));
+    }
+    
 	
 }

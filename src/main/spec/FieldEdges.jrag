@@ -1,7 +1,7 @@
 
 aspect FieldEdges {
 	
-	syn FieldEdges Method.createInitialFieldEdges() = new FieldEdges();
+	syn FieldEdges Method.createInitialFieldEdges() = FieldEdges.getInstance();
 		
 	syn FieldEdges Instruction.transferFieldEdges(FieldEdges fieldEdgesIn, OpStack opStack) = fieldEdgesIn;
 	
@@ -23,6 +23,27 @@ aspect FieldEdges {
                     fieldEdges.add(new FieldEdge(obj, getFieldName(), referredValue));
 
         return fieldEdgesIn.addAll(fieldEdges);
+    }
+
+    
+    syn ReferenceSlot FieldLoadInstruction.getLoadObjectRef(OpStack opStack) = null;
+    syn ReferenceSlot GetField.getLoadObjectRef(OpStack opStack) =  (ReferenceSlot) opStack.top();
+    syn ReferenceSlot Aaload.getLoadObjectRef(OpStack opStack) =    (ReferenceSlot) opStack.pop().top();      
+    syn ReferenceSlot GetStatic.getLoadObjectRef(OpStack opStack) = method().clazz().program().getGlobalReference();
+    
+    private Slot FieldLoadInstruction.getFieldValueSlot(OpStack opStack, FieldEdges fieldEdges) {
+        Slot fieldValueSlot;
+        if (getFieldType() instanceof org.apache.bcel.generic.ReferenceType) {
+            Set<ObjectNode> fieldValues = new HashSet<ObjectNode>();
+
+            // Null Handling?
+            for (ObjectNode obj : getLoadObjectRef(opStack).getObjects())
+                fieldValues.addAll(fieldEdges.getObjectsOfField(obj, getFieldName()));
+
+            fieldValueSlot = ReferenceSlot.getInstance().addObjects(fieldValues);
+        } else
+            fieldValueSlot = PrimitiveSlot.getInstance();
+        return fieldValueSlot;
     }
 
 	
