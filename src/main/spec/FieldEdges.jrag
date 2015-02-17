@@ -9,7 +9,7 @@ aspect FieldEdges {
 	syn ReferenceSlot FieldAssignmentInstruction.getStoreObjectRef(OpStack opStack) = null;     
     syn ReferenceSlot PutField.getStoreObjectRef(OpStack opStack) =  (ReferenceSlot) opStack.pop().top();
     syn ReferenceSlot Aastore.getStoreObjectRef(OpStack opStack) =   (ReferenceSlot) opStack.pop().pop().top();
-    syn ReferenceSlot PutStatic.getStoreObjectRef(OpStack opStack) = method().clazz().program().getGlobalReference();
+    syn ReferenceSlot PutStatic.getStoreObjectRef(OpStack opStack) = new ReferenceSlot(getGlobalObject());
                 
     syn FieldEdges FieldAssignmentInstruction.transferFieldEdges(FieldEdges fieldEdgesIn, OpStack opStack) {
         // notation: obj.field = value
@@ -29,7 +29,7 @@ aspect FieldEdges {
     syn ReferenceSlot FieldLoadInstruction.getLoadObjectRef(OpStack opStack) = null;
     syn ReferenceSlot GetField.getLoadObjectRef(OpStack opStack) =  (ReferenceSlot) opStack.top();
     syn ReferenceSlot Aaload.getLoadObjectRef(OpStack opStack) =    (ReferenceSlot) opStack.pop().top();      
-    syn ReferenceSlot GetStatic.getLoadObjectRef(OpStack opStack) = method().clazz().program().getGlobalReference();
+    syn ReferenceSlot GetStatic.getLoadObjectRef(OpStack opStack) = new ReferenceSlot(getGlobalObject());
     
     private Slot FieldLoadInstruction.getFieldValueSlot(OpStack opStack, FieldEdges fieldEdges) {
         Slot fieldValueSlot;

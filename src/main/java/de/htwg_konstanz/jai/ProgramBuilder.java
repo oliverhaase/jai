@@ -7,10 +7,6 @@ import org.apache.bcel.classfile.JavaClass;
 
 import de.htwg_konstanz.jai.gen.Program;
 import de.htwg_konstanz.jai.gen.ReferenceType;
-<<<<<<< Upstream, based on origin/master
-=======
-import de.htwg_konstanz.jai.vm.ReferenceSlot;
->>>>>>> 0abadd9 add GlobalReference to Bytecode.ast as attribute of program
 
 public class ProgramBuilder {
 	private final String[] classNames;
@@ -29,8 +25,6 @@ public class ProgramBuilder {
 			JavaClass clazz = Repository.lookupClass(className);
 			program.addByteCodeClass(new AstConverter(clazz).convert());
 		}
-
-		program.setGlobalReference(new ReferenceSlot(new ReferenceType("GLOBAL")));
 
 		return program;
 	}
