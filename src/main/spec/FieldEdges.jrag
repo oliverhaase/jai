@@ -40,7 +40,7 @@ aspect FieldEdges {
             for (ObjectNode obj : getLoadObjectRef(opStack).getObjects())
                 fieldValues.addAll(fieldEdges.getObjectsOfField(obj, getFieldName()));
 
-            fieldValueSlot = ReferenceSlot.getInstance().addObjects(fieldValues);
+            fieldValueSlot = new ReferenceSlot(fieldValues);
         } else
             fieldValueSlot = PrimitiveSlot.getInstance();
         return fieldValueSlot;

@@ -28,6 +28,10 @@ public final class ReferenceSlot implements Slot {
 		objectNodes.add(objectNode);
 	}
 
+	public ReferenceSlot(Set<ObjectNode> objectNodes) {
+		this.objectNodes = new HashSet<>(objectNodes);
+	}
+
 	private ReferenceSlot(ReferenceSlot original) {
 		objectNodes = new HashSet<>(original.objectNodes);
 	}
