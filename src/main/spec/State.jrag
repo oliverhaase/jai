@@ -37,28 +37,37 @@ aspect State {
 	syn State Instruction.transferState(State stateIn) =
 		 new State(transferLocalVars(stateIn.getLocalVars(), null),
 				transferOpStack(stateIn.getOpStack(), null),
-				transferFieldEdges(stateIn.getFieldEdges(), null)); 	
+				transferFieldEdges(stateIn.getFieldEdges(), null, null)); 	
 				
 		
 	eq StoreInstruction.transferState(State stateIn) =
 		new State(transferLocalVars(stateIn.getLocalVars(), stateIn.getOpStack().top()),
 				transferOpStack(stateIn.getOpStack(), null),
-				transferFieldEdges(stateIn.getFieldEdges(), null));
+				transferFieldEdges(stateIn.getFieldEdges(), null, null));
 	
 	eq LoadInstruction.transferState(State stateIn) =
 		new State(transferLocalVars(stateIn.getLocalVars(), null),
 				transferOpStack(stateIn.getOpStack(), stateIn.getLocalVars().get(getIndex())),
-				transferFieldEdges(stateIn.getFieldEdges(), null));
+				transferFieldEdges(stateIn.getFieldEdges(), null, null));
 	
 	eq FieldAssignmentInstruction.transferState(State stateIn) =
         new State(transferLocalVars(stateIn.getLocalVars(), null),
                 transferOpStack(stateIn.getOpStack(), null),
-                transferFieldEdges(stateIn.getFieldEdges(), stateIn.getOpStack()));
+                transferFieldEdges(stateIn.getFieldEdges(), value, objectRef));
+    
+    syn ReferenceSlot FieldAssignmentInstruction.getStoreObjectRef(OpStack opStack) = null;     
+    syn ReferenceSlot PutField.getStoreObjectRef(OpStack opStack) =  (ReferenceSlot) opStack.pop().top();
+    syn ReferenceSlot Aastore.getStoreObjectRef(OpStack opStack) =   (ReferenceSlot) opStack.pop().pop().top();
+    syn ReferenceSlot PutStatic.getStoreObjectRef(OpStack opStack) = new ReferenceSlot(getGlobalObject());
     
     eq FieldLoadInstruction.transferState(State stateIn) =
         new State(transferLocalVars(stateIn.getLocalVars(), null),
-                transferOpStack(stateIn.getOpStack(), getFieldValueSlot(stateIn.getOpStack(), stateIn.getFieldEdges())),
-                transferFieldEdges(stateIn.getFieldEdges(), null));
+                transferOpStack(stateIn.getOpStack(), fieldValueSlot),
+                transferFieldEdges(stateIn.getFieldEdges(), null, null));
  
-	
+    syn ReferenceSlot FieldLoadInstruction.getLoadObjectRef(OpStack opStack) = null;
+    syn ReferenceSlot GetField.getLoadObjectRef(OpStack opStack) =  (ReferenceSlot) opStack.top();
+    syn ReferenceSlot Aaload.getLoadObjectRef(OpStack opStack) =    (ReferenceSlot) opStack.pop().top();      
+    syn ReferenceSlot GetStatic.getLoadObjectRef(OpStack opStack) = new ReferenceSlot(getGlobalObject());
+    
 }

@@ -3,49 +3,22 @@ aspect FieldEdges {
 	
 	syn FieldEdges Method.createInitialFieldEdges() = FieldEdges.getInstance();
 		
-	syn FieldEdges Instruction.transferFieldEdges(FieldEdges fieldEdgesIn, OpStack opStack) = fieldEdgesIn;
+	syn FieldEdges Instruction.transferFieldEdges(FieldEdges fieldEdgesIn, Slot value,
+            ReferenceSlot objReference) = fieldEdgesIn;
 	
-
-	syn ReferenceSlot FieldAssignmentInstruction.getStoreObjectRef(OpStack opStack) = null;     
-    syn ReferenceSlot PutField.getStoreObjectRef(OpStack opStack) =  (ReferenceSlot) opStack.pop().top();
-    syn ReferenceSlot Aastore.getStoreObjectRef(OpStack opStack) =   (ReferenceSlot) opStack.pop().pop().top();
-    syn ReferenceSlot PutStatic.getStoreObjectRef(OpStack opStack) = new ReferenceSlot(getGlobalObject());
                 
-    syn FieldEdges FieldAssignmentInstruction.transferFieldEdges(FieldEdges fieldEdgesIn, OpStack opStack) {
+    syn FieldEdges FieldAssignmentInstruction.transferFieldEdges(FieldEdges fieldEdgesIn, Slot value,
+            ReferenceSlot objReference) {
         // notation: obj.field = value
-        Slot value = opStack.top();
-
         HashSet<FieldEdge> fieldEdges = new HashSet<FieldEdge>();
 
         if (value instanceof ReferenceSlot)
-            for (ObjectNode obj : getStoreObjectRef(opStack).getObjects())
+            for (ObjectNode obj : objReference.getObjects())
                 for (ObjectNode referredValue : ((ReferenceSlot) value).getObjects())
                     fieldEdges.add(new FieldEdge(obj, getFieldName(), referredValue));
 
         return fieldEdgesIn.addAll(fieldEdges);
     }
-
-    
-    syn ReferenceSlot FieldLoadInstruction.getLoadObjectRef(OpStack opStack) = null;
-    syn ReferenceSlot GetField.getLoadObjectRef(OpStack opStack) =  (ReferenceSlot) opStack.top();
-    syn ReferenceSlot Aaload.getLoadObjectRef(OpStack opStack) =    (ReferenceSlot) opStack.pop().top();      
-    syn ReferenceSlot GetStatic.getLoadObjectRef(OpStack opStack) = new ReferenceSlot(getGlobalObject());
-    
-    private Slot FieldLoadInstruction.getFieldValueSlot(OpStack opStack, FieldEdges fieldEdges) {
-        Slot fieldValueSlot;
-        if (getFieldType() instanceof org.apache.bcel.generic.ReferenceType) {
-            Set<ObjectNode> fieldValues = new HashSet<ObjectNode>();
-
-            // Null Handling?
-            for (ObjectNode obj : getLoadObjectRef(opStack).getObjects())
-                fieldValues.addAll(fieldEdges.getObjectsOfField(obj, getFieldName()));
-
-            fieldValueSlot = new ReferenceSlot(fieldValues);
-        } else
-            fieldValueSlot = PrimitiveSlot.getInstance();
-        return fieldValueSlot;
-    }
-
 	
 	/*
 	

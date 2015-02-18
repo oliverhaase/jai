@@ -54,4 +54,8 @@ public final class ReferenceSlot implements Slot {
 		return Collections.unmodifiableSet(objectNodes);
 	}
 
+	public boolean isNullReference() {
+		return objectNodes.isEmpty();
+	}
+
 }
