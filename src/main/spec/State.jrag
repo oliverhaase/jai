@@ -34,35 +34,31 @@ aspect State {
 	
 	// transfer attribute
 	
-	syn State Instruction.transferState(State stateIn) {
-		return new State(transferLocalVars(stateIn.getLocalVars(), null),
+	syn State Instruction.transferState(State stateIn) =
+		 new State(transferLocalVars(stateIn.getLocalVars(), null),
 				transferOpStack(stateIn.getOpStack(), null),
 				transferFieldEdges(stateIn.getFieldEdges(), null)); 	
-	}
+				
 		
-	eq StoreInstruction.transferState(State stateIn) {
-		return new State(transferLocalVars(stateIn.getLocalVars(), stateIn.getOpStack().top()),
+	eq StoreInstruction.transferState(State stateIn) =
+		new State(transferLocalVars(stateIn.getLocalVars(), stateIn.getOpStack().top()),
 				transferOpStack(stateIn.getOpStack(), null),
 				transferFieldEdges(stateIn.getFieldEdges(), null));
-	}
 	
-	eq LoadInstruction.transferState(State stateIn) {
-		return new State(transferLocalVars(stateIn.getLocalVars(), null),
+	eq LoadInstruction.transferState(State stateIn) =
+		new State(transferLocalVars(stateIn.getLocalVars(), null),
 				transferOpStack(stateIn.getOpStack(), stateIn.getLocalVars().get(getIndex())),
 				transferFieldEdges(stateIn.getFieldEdges(), null));
-	}
 	
-	eq FieldAssignmentInstruction.transferState(State stateIn) {
-        return new State(transferLocalVars(stateIn.getLocalVars(), null),
+	eq FieldAssignmentInstruction.transferState(State stateIn) =
+        new State(transferLocalVars(stateIn.getLocalVars(), null),
                 transferOpStack(stateIn.getOpStack(), null),
                 transferFieldEdges(stateIn.getFieldEdges(), stateIn.getOpStack()));
-    }
     
-    eq FieldLoadInstruction.transferState(State stateIn) {
-        return new State(transferLocalVars(stateIn.getLocalVars(), null),
+    eq FieldLoadInstruction.transferState(State stateIn) =
+        new State(transferLocalVars(stateIn.getLocalVars(), null),
                 transferOpStack(stateIn.getOpStack(), getFieldValueSlot(stateIn.getOpStack(), stateIn.getFieldEdges())),
                 transferFieldEdges(stateIn.getFieldEdges(), null));
-    }
-    
+ 
 	
 }
