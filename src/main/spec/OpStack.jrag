@@ -27,11 +27,14 @@ aspect OpStack {
 	syn OpStack LoadInstruction.transferOpStack(OpStack opStackIn, Slot slot) =
 		opStackIn.push(slot, getProduceStack());
 		
-	eq Ldc.transferOpStack(OpStack opStackIn) =
-		opStackIn.push(getConstantType() instanceof org.apache.bcel.generic.ReferenceType ?
-						new ReferenceSlot(getGlobalObject()) :
-						PrimitiveSlot.getInstance());		
-			
+    eq Ldc.transferOpStack(OpStack opStackIn) =
+        opStackIn.push(getConstantType() instanceof org.apache.bcel.generic.ReferenceType ?
+                        new ReferenceSlot(getGlobalObject()) :
+                        PrimitiveSlot.getInstance());
+	
+	eq AconstNull.transferOpStack(OpStack opStackIn) =
+		opStackIn.push(ReferenceSlot.getNullReference());		
+
 	eq DUP.transferOpStack(OpStack opStackIn) = opStackIn.push(opStackIn.top());
 
 	eq DUP_X1.transferOpStack(OpStack opStackIn) = 
@@ -68,23 +71,6 @@ aspect OpStack {
 		
 	
 /*
-
-	
-	
-	eq AconstNull.statesOut() =
-		States.processStates(statesIn(), new StateProcessor() {
-			@Override public State process(State original) {
-				Heap heap = original.getHeap();
-				ReferenceNode ref = new ReferenceNode(getPosition(), Category.LOCAL);
-				heap = heap.addReferenceAndTarget(ref, InternalObject.getNullObject()); 
-				return new State(
-					original.getLocalVars(), 
-					opStackIn.pop(getConsumeStack()).push(ref), 
-					heap); 
-			}
-		});
-	
-
 				
 	eq InvokeInstruction.statesOut() {
 		Set<State> result = new HashSet<State>();
