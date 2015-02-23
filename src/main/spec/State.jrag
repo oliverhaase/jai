@@ -52,7 +52,7 @@ aspect State {
 	eq FieldAssignmentInstruction.transferState(State stateIn) {
 	    ReferenceSlot objectRef = getStoreObjectRef(stateIn.getOpStack());
         if (objectRef.isNullReference())
-            return new State(null, null, null); // illegal State (NullPointerException)
+            return State.getExceptionState(); // illegal State (NullPointerException)
             
         Slot value = stateIn.getOpStack().top();
 	
@@ -68,7 +68,7 @@ aspect State {
     eq FieldLoadInstruction.transferState(State stateIn) {
         ReferenceSlot objectRef = getLoadObjectRef(stateIn.getOpStack());
         if (objectRef.isNullReference())
-            return new State(null, null, null); // illegal State (NullPointerException)
+            return State.getExceptionState(); // illegal State (NullPointerException)
         
         Slot fieldValueSlot;
         if (getFieldType() instanceof org.apache.bcel.generic.ReferenceType)
