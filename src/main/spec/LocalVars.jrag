@@ -15,9 +15,9 @@ aspect LocalVars {
 		return result;
 	}
 	
-	syn LocalVars Instruction.transferLocalVars(LocalVars localVarsIn, Slot slot) = localVarsIn;
+	syn LocalVars Instruction.transferLocalVars(LocalVars localVarsIn) = localVarsIn;
 	
-	eq StoreInstruction.transferLocalVars(LocalVars localVarsIn, Slot slot) 
+	syn LocalVars StoreInstruction.transferLocalVars(LocalVars localVarsIn, Slot slot) 
 		= localVarsIn.set(getIndex(), slot);	
 	
 	
