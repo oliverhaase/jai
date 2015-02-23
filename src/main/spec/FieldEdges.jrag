@@ -3,10 +3,8 @@ aspect FieldEdges {
 	
 	syn FieldEdges Method.createInitialFieldEdges() = FieldEdges.getInstance();
 		
-	syn FieldEdges Instruction.transferFieldEdges(FieldEdges fieldEdgesIn, Slot value,
-            ReferenceSlot objReference) = fieldEdgesIn;
+    syn FieldEdges Instruction.transferFieldEdges(FieldEdges fieldEdgesIn) = fieldEdgesIn;
 	
-                
     syn FieldEdges FieldAssignmentInstruction.transferFieldEdges(FieldEdges fieldEdgesIn, Slot value,
             ReferenceSlot objReference) {
         // notation: obj.field = value

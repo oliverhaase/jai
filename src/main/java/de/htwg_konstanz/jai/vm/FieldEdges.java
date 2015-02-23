@@ -49,13 +49,13 @@ public final class FieldEdges {
 		return objects;
 	}
 
-	public ReferenceSlot getFieldValueSlot(ReferenceSlot object, String fieldName) {
+	public Set<ObjectNode> getFieldValues(ReferenceSlot object, String fieldName) {
 		Set<ObjectNode> fieldValues = new HashSet<ObjectNode>();
 
 		for (ObjectNode obj : object.getObjects())
 			fieldValues.addAll(getObjectsOfField(obj, fieldName));
 
-		return new ReferenceSlot(fieldValues);
+		return fieldValues;
 	}
 
 }

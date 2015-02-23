@@ -35,36 +35,53 @@ aspect State {
 	// transfer attribute
 	
 	syn State Instruction.transferState(State stateIn) =
-		 new State(transferLocalVars(stateIn.getLocalVars(), null),
-				transferOpStack(stateIn.getOpStack(), null),
-				transferFieldEdges(stateIn.getFieldEdges(), null, null)); 	
-				
+		new State(transferLocalVars(stateIn.getLocalVars(), null),
+				transferOpStack(stateIn.getOpStack()),
+				transferFieldEdges(stateIn.getFieldEdges())); 	
 		
 	eq StoreInstruction.transferState(State stateIn) =
 		new State(transferLocalVars(stateIn.getLocalVars(), stateIn.getOpStack().top()),
-				transferOpStack(stateIn.getOpStack(), null),
-				transferFieldEdges(stateIn.getFieldEdges(), null, null));
+				transferOpStack(stateIn.getOpStack()),
+				transferFieldEdges(stateIn.getFieldEdges()));
 	
 	eq LoadInstruction.transferState(State stateIn) =
 		new State(transferLocalVars(stateIn.getLocalVars(), null),
 				transferOpStack(stateIn.getOpStack(), stateIn.getLocalVars().get(getIndex())),
-				transferFieldEdges(stateIn.getFieldEdges(), null, null));
+				transferFieldEdges(stateIn.getFieldEdges()));
 	
-	eq FieldAssignmentInstruction.transferState(State stateIn) =
-        new State(transferLocalVars(stateIn.getLocalVars(), null),
-                transferOpStack(stateIn.getOpStack(), null),
+	eq FieldAssignmentInstruction.transferState(State stateIn) {
+	    ReferenceSlot objectRef = getStoreObjectRef(stateIn.getOpStack());
+        if (objectRef.isNullReference())
+            return new State(null, null, null); // illegal State (NullPointerException)
+            
+        Slot value = stateIn.getOpStack().top();
+	
+        return new State(transferLocalVars(stateIn.getLocalVars(), null),
+                transferOpStack(stateIn.getOpStack()),
                 transferFieldEdges(stateIn.getFieldEdges(), value, objectRef));
-    
+    }
     syn ReferenceSlot FieldAssignmentInstruction.getStoreObjectRef(OpStack opStack) = null;     
     syn ReferenceSlot PutField.getStoreObjectRef(OpStack opStack) =  (ReferenceSlot) opStack.pop().top();
     syn ReferenceSlot Aastore.getStoreObjectRef(OpStack opStack) =   (ReferenceSlot) opStack.pop().pop().top();
     syn ReferenceSlot PutStatic.getStoreObjectRef(OpStack opStack) = new ReferenceSlot(getGlobalObject());
     
-    eq FieldLoadInstruction.transferState(State stateIn) =
-        new State(transferLocalVars(stateIn.getLocalVars(), null),
+    eq FieldLoadInstruction.transferState(State stateIn) {
+        ReferenceSlot objectRef = getLoadObjectRef(stateIn.getOpStack());
+        if (objectRef.isNullReference())
+            return new State(null, null, null); // illegal State (NullPointerException)
+        
+        Slot fieldValueSlot;
+        if (getFieldType() instanceof org.apache.bcel.generic.ReferenceType)
+            fieldValueSlot = new ReferenceSlot(stateIn.getFieldEdges().getFieldValues(objectRef, getFieldName()));
+        else
+            fieldValueSlot = PrimitiveSlot.getInstance();
+        
+        
+        return new State(transferLocalVars(stateIn.getLocalVars(), null),
                 transferOpStack(stateIn.getOpStack(), fieldValueSlot),
-                transferFieldEdges(stateIn.getFieldEdges(), null, null));
- 
+                transferFieldEdges(stateIn.getFieldEdges()));
+    }
+    
     syn ReferenceSlot FieldLoadInstruction.getLoadObjectRef(OpStack opStack) = null;
     syn ReferenceSlot GetField.getLoadObjectRef(OpStack opStack) =  (ReferenceSlot) opStack.top();
     syn ReferenceSlot Aaload.getLoadObjectRef(OpStack opStack) =    (ReferenceSlot) opStack.pop().top();      
