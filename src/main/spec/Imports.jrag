@@ -9,6 +9,8 @@ import org.apache.bcel.Repository;
 import org.apache.bcel.classfile.JavaClass;
 
 import de.htwg_konstanz.jai.vm.State;
+import de.htwg_konstanz.jai.vm.RegularState;
+import de.htwg_konstanz.jai.vm.ExceptionState;
 import de.htwg_konstanz.jai.vm.LocalVars;
 import de.htwg_konstanz.jai.vm.OpStack;
 import de.htwg_konstanz.jai.vm.Slot;

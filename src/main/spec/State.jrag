@@ -2,7 +2,7 @@
 aspect State {
 
 	syn State Method.createInitialState() =
-		new State(createInitialLocalVars(), createInitialOpStack(),
+		new RegularState(createInitialLocalVars(), createInitialOpStack(),
 			createInitialFieldEdges());
 
 
@@ -21,8 +21,12 @@ aspect State {
     eq Instruction.statesOut() {
     	Set<State> resultSet = new HashSet<State>();
 
-		for ( State stateIn : statesIn() ) 
-		   resultSet.add(transferState(stateIn)); 
+		for ( State stateIn : statesIn() ) {
+		   if (stateIn instanceof ExceptionState)
+		      resultSet.add(stateIn);
+	       else
+		      resultSet.add(transferState(((RegularState) stateIn))); 
+	    }
 		   
 		return resultSet;   
 	}	
@@ -34,29 +38,29 @@ aspect State {
 	
 	// transfer attribute
 	
-	syn State Instruction.transferState(State stateIn) =
-		new State(transferLocalVars(stateIn.getLocalVars()),
+	syn State Instruction.transferState(RegularState stateIn) =
+		new RegularState(transferLocalVars(stateIn.getLocalVars()),
 				transferOpStack(stateIn.getOpStack()),
 				transferFieldEdges(stateIn.getFieldEdges())); 	
 		
-	eq StoreInstruction.transferState(State stateIn) =
-		new State(transferLocalVars(stateIn.getLocalVars(), stateIn.getOpStack().top()),
+	eq StoreInstruction.transferState(RegularState stateIn) =
+		new RegularState(transferLocalVars(stateIn.getLocalVars(), stateIn.getOpStack().top()),
 				transferOpStack(stateIn.getOpStack()),
 				transferFieldEdges(stateIn.getFieldEdges()));
 	
-	eq LoadInstruction.transferState(State stateIn) =
-		new State(transferLocalVars(stateIn.getLocalVars()),
+	eq LoadInstruction.transferState(RegularState stateIn) =
+		new RegularState(transferLocalVars(stateIn.getLocalVars()),
 				transferOpStack(stateIn.getOpStack(), stateIn.getLocalVars().get(getIndex())),
 				transferFieldEdges(stateIn.getFieldEdges()));
 	
-	eq FieldAssignmentInstruction.transferState(State stateIn) {
+	eq FieldAssignmentInstruction.transferState(RegularState stateIn) {
 	    ReferenceSlot objectRef = getStoreObjectRef(stateIn.getOpStack());
         if (objectRef.isNullReference())
-            return State.getExceptionState(); // illegal State (NullPointerException)
+            return new ExceptionState(stateIn.getFieldEdges()); // illegal State (NullPointerException)
             
         Slot value = stateIn.getOpStack().top();
 	
-        return new State(transferLocalVars(stateIn.getLocalVars()),
+        return new RegularState(transferLocalVars(stateIn.getLocalVars()),
                 transferOpStack(stateIn.getOpStack()),
                 transferFieldEdges(stateIn.getFieldEdges(), value, objectRef));
     }
@@ -65,10 +69,10 @@ aspect State {
     syn ReferenceSlot Aastore.getStoreObjectRef(OpStack opStack) =   (ReferenceSlot) opStack.pop().pop().top();
     syn ReferenceSlot PutStatic.getStoreObjectRef(OpStack opStack) = new ReferenceSlot(getGlobalObject());
     
-    eq FieldLoadInstruction.transferState(State stateIn) {
+    eq FieldLoadInstruction.transferState(RegularState stateIn) {
         ReferenceSlot objectRef = getLoadObjectRef(stateIn.getOpStack());
         if (objectRef.isNullReference())
-            return State.getExceptionState(); // illegal State (NullPointerException)
+            return new ExceptionState(stateIn.getFieldEdges()); // illegal State (NullPointerException)
         
         Slot fieldValueSlot;
         if (getFieldType() instanceof org.apache.bcel.generic.ReferenceType)
@@ -77,7 +81,7 @@ aspect State {
             fieldValueSlot = PrimitiveSlot.getInstance();
         
         
-        return new State(transferLocalVars(stateIn.getLocalVars()),
+        return new RegularState(transferLocalVars(stateIn.getLocalVars()),
                 transferOpStack(stateIn.getOpStack(), fieldValueSlot),
                 transferFieldEdges(stateIn.getFieldEdges()));
     }
