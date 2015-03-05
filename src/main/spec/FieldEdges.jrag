@@ -11,8 +11,8 @@ aspect FieldEdges {
         HashSet<FieldEdge> fieldEdges = new HashSet<FieldEdge>();
 
         if (value instanceof ReferenceSlot)
-            for (ObjectNode obj : objReference.getObjects())
-                for (ObjectNode referredValue : ((ReferenceSlot) value).getObjects())
+            for (ObjectNode obj : objReference)
+                for (ObjectNode referredValue : (ReferenceSlot) value)
                     fieldEdges.add(new FieldEdge(obj, getFieldName(), referredValue));
 
         return fieldEdgesIn.addAll(fieldEdges);

@@ -1,7 +1,7 @@
 package de.htwg_konstanz.jai.vm;
 
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.annotation.CheckReturnValue;
@@ -11,7 +11,7 @@ import net.jcip.annotations.Immutable;
 
 @Immutable
 @EqualsAndHashCode
-public final class ReferenceSlot implements Slot {
+public final class ReferenceSlot implements Slot, Iterable<ObjectNode> {
 	private static final ReferenceSlot NULL_REFERENCE = new ReferenceSlot();
 	private final Set<ObjectNode> objectNodes;
 
@@ -50,12 +50,13 @@ public final class ReferenceSlot implements Slot {
 		return result;
 	}
 
-	public Set<ObjectNode> getObjects() {
-		return Collections.unmodifiableSet(objectNodes);
-	}
-
 	public boolean isNullReference() {
 		return this == NULL_REFERENCE;
+	}
+
+	@Override
+	public Iterator<ObjectNode> iterator() {
+		return objectNodes.iterator();
 	}
 
 }
