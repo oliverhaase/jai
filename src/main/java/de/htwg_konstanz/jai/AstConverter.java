@@ -125,7 +125,7 @@ public class AstConverter {
 		return exceptionHandlers;
 	}
 
-	private Type createJastAddType(org.apache.bcel.generic.Type argType) {
+	public static Type createJastAddType(org.apache.bcel.generic.Type argType) {
 		if (argType instanceof BasicType)
 			return new PrimitiveType(argType.getSize());
 

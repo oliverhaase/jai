@@ -21,6 +21,7 @@ import de.htwg_konstanz.jai.gen.GetField;
 import de.htwg_konstanz.jai.gen.GetStatic;
 import de.htwg_konstanz.jai.gen.GotoInstruction;
 import de.htwg_konstanz.jai.gen.Instruction;
+import de.htwg_konstanz.jai.gen.InvokeInstruction;
 import de.htwg_konstanz.jai.gen.InvokeInterface;
 import de.htwg_konstanz.jai.gen.InvokeSpecial;
 import de.htwg_konstanz.jai.gen.InvokeStatic;
@@ -184,42 +185,33 @@ public class AstConverterVisitor extends EmptyVisitor {
 
 	@Override
 	public void visitINVOKEINTERFACE(org.apache.bcel.generic.INVOKEINTERFACE bcelInstruction) {
-		InvokeInterface instruction = new InvokeInterface();
-		instruction.setLoadClass(bcelInstruction.getLoadClassType(cpg).toString());
-		instruction.setMethodName(bcelInstruction.getMethodName(cpg));
-		instruction.setArgTypes(bcelInstruction.getArgumentTypes(cpg));
-		instruction.setReturnType(bcelInstruction.getReturnType(cpg));
-		this.instruction = instruction;
+		this.instruction = initializeInvokeInstruction(bcelInstruction, new InvokeInterface());
 	}
 
 	@Override
 	public void visitINVOKESPECIAL(org.apache.bcel.generic.INVOKESPECIAL bcelInstruction) {
-		InvokeSpecial instruction = new InvokeSpecial();
-		instruction.setLoadClass(bcelInstruction.getLoadClassType(cpg).toString());
-		instruction.setMethodName(bcelInstruction.getMethodName(cpg));
-		instruction.setArgTypes(bcelInstruction.getArgumentTypes(cpg));
-		instruction.setReturnType(bcelInstruction.getReturnType(cpg));
-		this.instruction = instruction;
+		this.instruction = initializeInvokeInstruction(bcelInstruction, new InvokeSpecial());
 	}
 
 	@Override
 	public void visitINVOKESTATIC(org.apache.bcel.generic.INVOKESTATIC bcelInstruction) {
-		InvokeStatic instruction = new InvokeStatic();
-		instruction.setLoadClass(bcelInstruction.getLoadClassType(cpg).toString());
-		instruction.setMethodName(bcelInstruction.getMethodName(cpg));
-		instruction.setArgTypes(bcelInstruction.getArgumentTypes(cpg));
-		instruction.setReturnType(bcelInstruction.getReturnType(cpg));
-		this.instruction = instruction;
+		this.instruction = initializeInvokeInstruction(bcelInstruction, new InvokeStatic());
 	}
 
 	@Override
 	public void visitINVOKEVIRTUAL(org.apache.bcel.generic.INVOKEVIRTUAL bcelInstruction) {
-		InvokeVirtual instruction = new InvokeVirtual();
+		this.instruction = initializeInvokeInstruction(bcelInstruction, new InvokeVirtual());
+	}
+
+	private InvokeInstruction initializeInvokeInstruction(
+			org.apache.bcel.generic.InvokeInstruction bcelInstruction, InvokeInstruction instruction) {
 		instruction.setLoadClass(bcelInstruction.getLoadClassType(cpg).toString());
 		instruction.setMethodName(bcelInstruction.getMethodName(cpg));
-		instruction.setArgTypes(bcelInstruction.getArgumentTypes(cpg));
-		instruction.setReturnType(bcelInstruction.getReturnType(cpg));
-		this.instruction = instruction;
+		for (org.apache.bcel.generic.Type argType : bcelInstruction.getArgumentTypes(cpg))
+			instruction.addArgument(AstConverter.createJastAddType(argType));
+		instruction
+				.setReturnType(AstConverter.createJastAddType(bcelInstruction.getReturnType(cpg)));
+		return instruction;
 	}
 
 	@Override

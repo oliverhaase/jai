@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Collections;
 import de.htwg_konstanz.jai.AstConverter;
+import de.htwg_konstanz.jai.ClassPath;
 
 import org.apache.bcel.Repository;
 import org.apache.bcel.classfile.JavaClass;
@@ -20,6 +21,7 @@ import de.htwg_konstanz.jai.vm.ObjectNode;
 import de.htwg_konstanz.jai.vm.FieldEdges;
 import de.htwg_konstanz.jai.vm.FieldEdge;
 
+import java.util.NoSuchElementException;
 
 aspect Imports {
 }
