@@ -47,13 +47,13 @@ BranchInstruction : Instruction ::= <TargetPositions:int[]>;
 
 
 abstract InvokeInstruction : Instruction ::= <LoadClass:String> <MethodName:String> Argument:Type* ReturnType:TypeOrVoid;
-StaticInvokeInstruction : InvokeInstruction;
-InvokeSpecial : StaticInvokeInstruction;
-InvokeStatic : StaticInvokeInstruction;
+EarlyBoundInvokeInstruction : InvokeInstruction;
+InvokeSpecial : EarlyBoundInvokeInstruction;
+InvokeStatic : EarlyBoundInvokeInstruction;
 
-DynamicInvokeInstruction : InvokeInstruction;
-InvokeInterface : DynamicInvokeInstruction;
-InvokeVirtual : DynamicInvokeInstruction;
+LateBoundInvokeInstruction : InvokeInstruction;
+InvokeInterface : LateBoundInvokeInstruction;
+InvokeVirtual : LateBoundInvokeInstruction;
 
 
 abstract NewInstruction : Instruction  ::= <Type:String>;
