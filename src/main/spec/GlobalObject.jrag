@@ -1,6 +1,6 @@
 aspect GlobalObject {
 
-	syn ReferenceType ByteCodeClass.getGlobalObject() = program().getGlobalObject();
-	syn ReferenceType Method.getGlobalObject() = clazz().getGlobalObject();
-	syn ReferenceType Instruction.getGlobalObject() = method().getGlobalObject();		
+	syn GlobalObject ByteCodeClass.getGlobalObject() = program().getGlobalObject();
+	syn GlobalObject Method.getGlobalObject() = clazz().getGlobalObject();
+	syn GlobalObject Instruction.getGlobalObject() = method().getGlobalObject();		
 }

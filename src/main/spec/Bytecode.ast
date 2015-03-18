@@ -1,6 +1,8 @@
 
 
-Program ::= ByteCodeClass* GlobalObject:ReferenceType;
+Program ::= ByteCodeClass* GlobalObject;
+
+GlobalObject;
 
 ByteCodeClass ::= <Name:String> <SuperClass:String> <IsFinal:boolean> Method*;
 

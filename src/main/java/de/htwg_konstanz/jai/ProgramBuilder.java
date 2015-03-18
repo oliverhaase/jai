@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.apache.bcel.Repository;
 import org.apache.bcel.classfile.JavaClass;
 
+import de.htwg_konstanz.jai.gen.GlobalObject;
 import de.htwg_konstanz.jai.gen.Program;
-import de.htwg_konstanz.jai.gen.ReferenceType;
 
 public class ProgramBuilder {
 	private final String[] classNames;
@@ -19,7 +19,7 @@ public class ProgramBuilder {
 
 	public Program build() throws ClassNotFoundException {
 		Program program = new Program();
-		program.setGlobalObject(new ReferenceType("java.lang.Object"));
+		program.setGlobalObject(new GlobalObject());
 
 		for (String className : classNames) {
 			JavaClass clazz = Repository.lookupClass(className);
