@@ -18,6 +18,8 @@ import de.htwg_konstanz.jai.vm.Slot;
 import de.htwg_konstanz.jai.vm.PrimitiveSlot;
 import de.htwg_konstanz.jai.vm.ReferenceSlot;
 import de.htwg_konstanz.jai.vm.ObjectNode;
+import de.htwg_konstanz.jai.vm.RealObject;
+import de.htwg_konstanz.jai.vm.PhantomObject;
 import de.htwg_konstanz.jai.vm.FieldEdges;
 import de.htwg_konstanz.jai.vm.FieldEdge;
 
