@@ -8,6 +8,7 @@ import javax.annotation.CheckReturnValue;
 
 import lombok.EqualsAndHashCode;
 import net.jcip.annotations.Immutable;
+import de.htwg_konstanz.jai.gen.NewInstruction;
 
 @Immutable
 @EqualsAndHashCode
@@ -52,6 +53,15 @@ public final class ReferenceSlot implements Slot, Iterable<ObjectNode> {
 
 	public boolean isNullReference() {
 		return this == NULL_REFERENCE;
+	}
+
+	public boolean isReferenceToInternalObjects() {
+		for (ObjectNode nodes : objectNodes) {
+			if (!(nodes instanceof NewInstruction)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override

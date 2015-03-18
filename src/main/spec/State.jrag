@@ -91,4 +91,15 @@ aspect State {
     syn ReferenceSlot Aaload.getLoadObjectRef(OpStack opStack) =    (ReferenceSlot) opStack.pop().top();      
     syn ReferenceSlot GetStatic.getLoadObjectRef(OpStack opStack) = new ReferenceSlot(getGlobalObject());
     
+    
+    eq InvokeVirtual.transferState(RegularState stateIn) {
+        ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack().pop(getConsumeStack()).top();
+        
+        // TODO
+        
+        return new RegularState(transferLocalVars(stateIn.getLocalVars()),
+                transferOpStack(stateIn.getOpStack()),
+                transferFieldEdges(stateIn.getFieldEdges()));
+    }
+    
 }

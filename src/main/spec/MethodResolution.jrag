@@ -1,0 +1,111 @@
+aspect MethodResolution {
+
+    // syn nta AlienClass Program.alienClass() = new AlienClass();
+    // syn nta AlienMethod AlienClass.alienMethod() = new AlienMethod();
+    
+    
+    syn Method StaticInvokeInstruction.getTargetMethod() = 
+        method().clazz().program().getClass(getLoadClass())
+            .resolveMethodDefinition(getMethodName(), getArguments());
+    
+     /**
+     * For internal created Objects (NewInstruction) the dynamic type is knwon and can be used
+     * to resolve the Method to invoke. If at least one is unknown (Parameter) all possible implementations
+     * in the current ClassPath are used.
+     */     
+    syn Set<Method> DynamicInvokeInstruction.getTargetMethods(ReferenceSlot objRef) {
+        
+        if (objRef.isReferenceToInternalObjects())
+            return getTargetMethodsOfDynamicType(objRef);
+        else
+            return getTargetMethodsOfStaticType();
+
+    }
+    
+    private Set<Method> DynamicInvokeInstruction.getTargetMethodsOfDynamicType(ReferenceSlot objRef) {
+        Set<Method> methods = new HashSet<Method>();
+
+        for (ObjectNode targetObject : objRef)
+                methods.add(method().clazz().program()
+                    .getClass(((NewInstruction) targetObject).getType())
+                    .resolveMethodDefinition(getMethodName(), getArguments()));
+        
+        return methods;
+    }
+
+    private Set<Method> DynamicInvokeInstruction.getTargetMethodsOfStaticType() {
+
+        // class or method is final   TODO all ctors are private <=> final
+        ByteCodeClass clazz = method().clazz().program().getClass(getLoadClass());
+        if (clazz.getIsFinal() || clazz.isMethodFinal(getMethodName(), getArguments())) {
+            return Collections.singleton(clazz.resolveMethodDefinition(getMethodName(), getArguments()));
+        }
+        
+        // methods of Object ? -> all Subtypes are too much -> use implementation of Object ??? (jea)
+
+        // get all Implementations of the Static Typein the current ClassPath
+        Set<Method> methods = new HashSet<Method>();
+        for (String type : ClassPath.getInstance().getSubTypsOf(getLoadClass())) {
+            ByteCodeClass subClazz = method().clazz().program().getClass(type);
+            if (subClazz != null) { // clazz not in current ClassPath
+                Method method = subClazz.resolveMethodDefinition(getMethodName(), getArguments());
+                if (method != null) // method not found (clazz is interface)
+                    methods.add(method);
+            }
+        }
+        return methods;
+    }
+    
+    
+    syn boolean Method.matches(String methodName, List<Type> arguments) {
+        if (!methodName.equals(getMethodName())
+                || arguments.getNumChild() != getArguments().getNumChild())
+            return false;
+
+        for (int i = 0; i < arguments.getNumChild(); i++)
+            if (!arguments.getChild(i).equals(getArguments().getChild(i)))
+                return false;
+
+        // TODO equals for Type
+        throw new AssertionError();
+
+        // return true;
+    }
+    
+    syn Method ByteCodeClass.lookup(String methodName, List<Type> arguments) {
+        for ( Method method : getMethods() )
+            if ( method.matches(methodName, arguments))
+                return method;
+        return null;
+    }
+    
+    /**
+     * Search for the definition of {@code methodName} in this class and all SuperClasses.
+     * If the method wasn't found a NoSuchElementException is thrown.
+     */ 
+    syn Method ByteCodeClass.resolveMethodDefinition(String methodName, List<Type> arguments) {
+        Method method = lookup(methodName, arguments);
+        if (method != null)
+            return method;
+
+        if (getName().equals("java.lang.Object"))
+            throw new NoSuchElementException("Method resolution failed: " + methodName + " not found");
+
+        // search in Surrounding Class ???? see jea
+
+        return program().getClass(getSuperClass()).resolveMethodDefinition(methodName, arguments);
+    }
+    
+    syn boolean ByteCodeClass.isMethodFinal(String methodName, List<Type> arguments) {
+        Method method = lookup(methodName, arguments);
+        if (method != null)
+            return method.getIsFinal();
+
+        if (getName().equals("java.lang.Object"))
+            return false; // no method definition found (must be defined in interface, so must not be final)
+
+        // search in Surrounding Class ???? see jea
+
+        return program().getClass(getSuperClass()).isMethodFinal(methodName, arguments);
+    }
+}
