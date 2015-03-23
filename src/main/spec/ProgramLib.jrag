@@ -5,6 +5,7 @@ aspect ProgramLib {
             JavaClass clazz = Repository.lookupClass(className);
             return new AstConverter(clazz).convert();
         } catch (ClassNotFoundException e) {
+            System.err.println("Class not found " + className); // TODO remove (dokumentieren wieso)
             return null;
         }
 	}

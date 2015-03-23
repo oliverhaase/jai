@@ -53,18 +53,12 @@ aspect MethodResolution {
         // methods of Object ? -> all Subtypes are too much -> use
         // implementation of Object ??? (jea)
 
-        // get all Implementations of the Static Typein the current ClassPath
+        // get all Implementations of the Static Type in the current ClassPath
         Set<ByteCodeClass> classes = new HashSet<ByteCodeClass>();
         for (String subType : ClassPath.getInstance().getSubTypsOf(clazz.getName())) {
-            classes.add(method().clazz().program().getClass(subType));
             ByteCodeClass subClazz = method().clazz().program().getClass(subType);
-            // if (subClazz != null) { // clazz not in current ClassPath TODO
-            // ???
-            // Method method = subClazz.resolveMethodDefinition(getMethodName(),
-            // getArguments());
-            // if (method != null) // method not found (clazz is interface)
-            // classes.add(method);
-            // }
+            if (subClazz != null) { // clazz not in current ClassPath TODO
+	            classes.add(subClazz);
         }
         return classes;
     }
@@ -79,10 +73,7 @@ aspect MethodResolution {
             if (!arguments.getChild(i).equals(getArguments().getChild(i)))
                 return false;
 
-        // TODO equals for Type -> aspect equals.jrag !!
-        throw new AssertionError();
-
-        // return true;
+        return true;
     }
     
     syn Method ByteCodeClass.lookup(String methodName, List<Type> arguments) {
