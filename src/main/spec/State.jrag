@@ -75,7 +75,7 @@ aspect State {
             return new ExceptionState(stateIn.getFieldEdges()); // illegal State (NullPointerException)
         
         Slot fieldValueSlot;
-        if (getFieldType() instanceof org.apache.bcel.generic.ReferenceType)
+        if (getFieldType() instanceof ReferenceType)
             fieldValueSlot = new ReferenceSlot(stateIn.getFieldEdges().getFieldValues(objectRef, getFieldName()));
         else
             fieldValueSlot = PrimitiveSlot.getInstance();

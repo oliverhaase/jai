@@ -35,7 +35,7 @@ PutField : FieldAssignmentInstruction;
 Aastore : FieldAssignmentInstruction;
 PutStatic : FieldAssignmentInstruction;
 
-abstract FieldLoadInstruction : Instruction ::= <FieldName:String> <FieldType:org.apache.bcel.generic.Type>;
+abstract FieldLoadInstruction : Instruction ::= <FieldName:String> <FieldType:Type>;
 GetField : FieldLoadInstruction;
 Aaload : FieldLoadInstruction;
 GetStatic : FieldLoadInstruction;
