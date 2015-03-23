@@ -92,10 +92,26 @@ aspect State {
     syn ReferenceSlot GetStatic.getLoadObjectRef(OpStack opStack) = new ReferenceSlot(getGlobalObject());
     
     
-    eq InvokeVirtual.transferState(RegularState stateIn) {
-        ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack().pop(getConsumeStack()).top();
+    eq EarlyBoundInvokeInstruction.transferState(RegularState stateIn) {
+        ReferenceSlot objectRef = (ReferenceSlot) stateIn.getOpStack().pop(getConsumeStack()).top();
         
-        // TODO
+        if (objectRef.isNullReference()) // TODO notwendig?
+            return new ExceptionState(stateIn.getFieldEdges()); // illegal State (NullPointerException)
+            
+        Method targetMethod = getTargetMethod();
+        
+        return new RegularState(transferLocalVars(stateIn.getLocalVars()),
+                transferOpStack(stateIn.getOpStack()),
+                transferFieldEdges(stateIn.getFieldEdges()));
+    }
+    
+    eq LateBoundInvokeInstruction.transferState(RegularState stateIn) {
+        ReferenceSlot objectRef = (ReferenceSlot) stateIn.getOpStack().pop(getConsumeStack()).top();
+        
+        if (objectRef.isNullReference())
+            return new ExceptionState(stateIn.getFieldEdges()); // illegal State (NullPointerException)
+            
+        Set<Method> targetMethod = getTargetMethods(objectRef);
         
         return new RegularState(transferLocalVars(stateIn.getLocalVars()),
                 transferOpStack(stateIn.getOpStack()),

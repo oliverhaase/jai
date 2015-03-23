@@ -3,65 +3,70 @@ aspect MethodResolution {
     // syn nta AlienClass Program.alienClass() = new AlienClass();
     // syn nta AlienMethod AlienClass.alienMethod() = new AlienMethod();
     
+    syn String FieldLoadInstruction.getType() = ((ReferenceType) getFieldType()).getType();
     
     syn Method EarlyBoundInvokeInstruction.getTargetMethod() = 
         method().clazz().program().getClass(getLoadClass())
             .resolveMethodDefinition(getMethodName(), getArguments());
     
      /**
-     * For internal created Objects (NewInstruction) the dynamic type is knwon and can be used
-     * to resolve the Method to invoke. If at least one is unknown (Parameter) all possible implementations
-     * in the current ClassPath are used.
+     * For internal created Objects (RealObject) the dynamic type is known and can be used
+     * to resolve the Method to invoke.
+     * For arguments (PhantomObject) all possible implementations of the static type in the 
+     * current ClassPath are used.
+     * For GlobalObjects all possible implementations of the LoadClassType in the 
+     * current ClassPath are used.
      */     
     syn Set<Method> LateBoundInvokeInstruction.getTargetMethods(ReferenceSlot objRef) {
-        
-       /* fore objRef
-            instanceof RealOBj
-                getTargetMethodsOfDynamicType(objRef)
-            instanceof PhantonOBj
-                getTargetMethodsOfStaticType(objRef)
-            instanceof GlobalObj
-                getTargetMethodsOfStaticType(getLoadClass)
-        
-        if (objRef.isReferenceToInternalObjects())
-            return getTargetMethodsOfDynamicType(objRef);
-        else
-            return getTargetMethodsOfStaticType();*/
+        Set<ByteCodeClass> targetClasses = new HashSet<ByteCodeClass>();
 
+        for (ObjectNode targetObject : objRef) {
+            if (targetObject instanceof RealObject)
+                targetClasses.add(getTargetMethodsOfDynamicType(((RealObject) targetObject)
+                        .getType()));
+            if (targetObject instanceof PhantomObject)
+                targetClasses.addAll(getTargetMethodsOfStaticType(((PhantomObject) targetObject)
+                        .getType()));
+            if (targetObject instanceof GlobalObject)
+                targetClasses.addAll(getTargetMethodsOfStaticType(getLoadClass()));
+        }
+
+        HashSet<Method> methods = new HashSet<Method>();
+
+        for (ByteCodeClass clazz : targetClasses) 
+            methods.add(clazz.resolveMethodDefinition(getMethodName(), getArguments()));
+        
+        return methods;
     }
     
-    private Set<Method> LateBoundInvokeInstruction.getTargetMethodsOfDynamicType(ReferenceSlot objRef) {
-        Set<Method> methods = new HashSet<Method>();
-
-        for (ObjectNode targetObject : objRef)
-                methods.add(method().clazz().program()
-                    .getClass(((NewInstruction) targetObject).getType())
-                    .resolveMethodDefinition(getMethodName(), getArguments()));
-        
-        return methods;
+    private ByteCodeClass LateBoundInvokeInstruction.getTargetMethodsOfDynamicType(String type) {
+        return method().clazz().program().getClass(type);
     }
 
-    private Set<Method> LateBoundInvokeInstruction.getTargetMethodsOfStaticType() {
-
-        // class or method is final   TODO all ctors are private <=> final
-        ByteCodeClass clazz = method().clazz().program().getClass(getLoadClass());
+    private Set<ByteCodeClass> LateBoundInvokeInstruction.getTargetMethodsOfStaticType(String type) {
+        // class or method is final TODO all ctors are private <=> final
+        ByteCodeClass clazz = method().clazz().program().getClass(type);
         if (clazz.getIsFinal() || clazz.isMethodFinal(getMethodName(), getArguments())) {
-            return Collections.singleton(clazz.resolveMethodDefinition(getMethodName(), getArguments()));
+            return Collections.singleton(clazz);
         }
-        
-        // methods of Object ? -> all Subtypes are too much -> use implementation of Object ??? (jea)
+
+        // methods of Object ? -> all Subtypes are too much -> use
+        // implementation of Object ??? (jea)
 
         // get all Implementations of the Static Typein the current ClassPath
-        Set<Method> methods = new HashSet<Method>();
-        for (String type : ClassPath.getInstance().getSubTypsOf(getLoadClass())) {
-            ByteCodeClass subClazz = method().clazz().program().getClass(type);
-            if (subClazz != null) { // clazz not in current ClassPath TODO ???
-                Method method = subClazz.resolveMethodDefinition(getMethodName(), getArguments());
-                if (method != null) // method not found (clazz is interface)
-                    methods.add(method);
-            }
+        Set<ByteCodeClass> classes = new HashSet<ByteCodeClass>();
+        for (String subType : ClassPath.getInstance().getSubTypsOf(clazz.getName())) {
+            classes.add(method().clazz().program().getClass(subType));
+            ByteCodeClass subClazz = method().clazz().program().getClass(subType);
+            // if (subClazz != null) { // clazz not in current ClassPath TODO
+            // ???
+            // Method method = subClazz.resolveMethodDefinition(getMethodName(),
+            // getArguments());
+            // if (method != null) // method not found (clazz is interface)
+            // classes.add(method);
+            // }
         }
-        return methods;
+        return classes;
     }
     
     
@@ -89,7 +94,7 @@ aspect MethodResolution {
     
     /**
      * Search for the definition of {@code methodName} in this class and all SuperClasses.
-     * If the method wasn't found a NoSuchElementException is thrown.
+     * If the method wasn't found an AssertionError is thrown.
      */ 
     syn Method ByteCodeClass.resolveMethodDefinition(String methodName, List<Type> arguments) {
         Method method = lookup(methodName, arguments);
