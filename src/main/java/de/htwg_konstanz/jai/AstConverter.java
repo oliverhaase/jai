@@ -127,7 +127,7 @@ public class AstConverter {
 
 	public static Type createJastAddType(org.apache.bcel.generic.Type argType) {
 		if (argType instanceof BasicType)
-			return new PrimitiveType(argType.getSize());
+			return new PrimitiveType(argType.toString(), argType.getSize());
 
 		if (argType instanceof ObjectType)
 			return new ReferenceType(((ObjectType) argType).getClassName());

@@ -12,11 +12,11 @@ Method ::= <IsAbstract:boolean> <IsNative:boolean> <IsPrivate:boolean> <IsFinal:
 
 abstract TypeOrVoid;
 
-Type : TypeOrVoid;
+Type : TypeOrVoid ::= <Type:String>;
 Void : TypeOrVoid;
 
 PrimitiveType : Type ::= <Size:int>;
-ReferenceType : Type ::= <Type:String>;
+ReferenceType : Type;
 
 
 abstract Instruction ::= <Label:String> <Position:int> <ConsumeStack:int> <ProduceStack:int> <ExceptionHandlers:java.util.Set<Integer>>;
