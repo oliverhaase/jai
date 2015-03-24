@@ -22,13 +22,13 @@ aspect MethodResolution {
 
         for (ObjectNode targetObject : objRef) {
             if (targetObject instanceof RealObject)
-                targetClasses.add(getTargetMethodsOfDynamicType(((RealObject) targetObject)
+                targetClasses.add(method().clazz().program().getClass(((RealObject) targetObject)
                         .getType()));
             if (targetObject instanceof PhantomObject)
-                targetClasses.addAll(getTargetMethodsOfStaticType(((PhantomObject) targetObject)
+                targetClasses.addAll(getImplementationsOf(((PhantomObject) targetObject)
                         .getType()));
             if (targetObject instanceof GlobalObject)
-                targetClasses.addAll(getTargetMethodsOfStaticType(getLoadClass()));
+                targetClasses.addAll(getImplementationsOf(getLoadClass()));
         }
 
         HashSet<Method> methods = new HashSet<Method>();
@@ -39,11 +39,7 @@ aspect MethodResolution {
         return methods;
     }
     
-    private ByteCodeClass LateBoundInvokeInstruction.getTargetMethodsOfDynamicType(String type) {
-        return method().clazz().program().getClass(type);
-    }
-
-    private Set<ByteCodeClass> LateBoundInvokeInstruction.getTargetMethodsOfStaticType(String type) {
+    private Set<ByteCodeClass> LateBoundInvokeInstruction.getImplementationsOf(String type) {
         // class or method is final TODO all ctors are private <=> final
         ByteCodeClass clazz = method().clazz().program().getClass(type);
         if (clazz.getIsFinal() || clazz.isMethodFinal(getMethodName(), getArguments())) {
@@ -58,7 +54,7 @@ aspect MethodResolution {
         for (String subType : ClassPath.getInstance().getSubTypsOf(clazz.getName())) {
             ByteCodeClass subClazz = method().clazz().program().getClass(subType);
             if (subClazz != null)  // clazz not in current ClassPath TODO
-	            classes.add(subClazz);
+                classes.add(subClazz);
         }
         return classes;
     }
