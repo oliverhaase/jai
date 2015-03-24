@@ -57,7 +57,7 @@ aspect MethodResolution {
         Set<ByteCodeClass> classes = new HashSet<ByteCodeClass>();
         for (String subType : ClassPath.getInstance().getSubTypsOf(clazz.getName())) {
             ByteCodeClass subClazz = method().clazz().program().getClass(subType);
-            if (subClazz != null) { // clazz not in current ClassPath TODO
+            if (subClazz != null)  // clazz not in current ClassPath TODO
 	            classes.add(subClazz);
         }
         return classes;
