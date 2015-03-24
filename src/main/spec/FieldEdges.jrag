@@ -17,6 +17,10 @@ aspect FieldEdges {
 
         return fieldEdgesIn.addAll(fieldEdges);
     }
+    
+    syn FieldEdges FieldLoadInstruction.transferFieldEdges(FieldEdges fieldEdgesIn, Set<FieldEdge> newEdges) = 
+    	 fieldEdgesIn.addAll(newEdges);
+    	 
 	
 	/*
 	

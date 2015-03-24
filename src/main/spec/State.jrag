@@ -70,21 +70,39 @@ aspect State {
     syn ReferenceSlot PutStatic.getStoreObjectRef(OpStack opStack) = new ReferenceSlot(getGlobalObject());
     
     eq FieldLoadInstruction.transferState(RegularState stateIn) {
-        ReferenceSlot objectRef = getLoadObjectRef(stateIn.getOpStack());
-        if (objectRef.isNullReference())
-            return new ExceptionState(stateIn.getFieldEdges()); // illegal State (NullPointerException)
-        
-        Slot fieldValueSlot;
-        if (getFieldType() instanceof ReferenceType)
-            fieldValueSlot = new ReferenceSlot(stateIn.getFieldEdges().getFieldValues(objectRef, getFieldName()));
-        else
-            fieldValueSlot = PrimitiveSlot.getInstance();
-        
-        
+    	ReferenceSlot objectRef = getLoadObjectRef(stateIn.getOpStack());
+
+		if ( objectRef.isNullReference() )
+			return new ExceptionState(stateIn.getFieldEdges()); // illegal State (NullPointerException)
+       
+		if ( getFieldType() instanceof PrimitiveType ) 
+			return new RegularState(
+				stateIn.getLocalVars(),
+                transferOpStack(stateIn.getOpStack(), PrimitiveSlot.getInstance()),
+				stateIn.getFieldEdges());
+            
+       	Set<ObjectNode> resultObjects = new HashSet<ObjectNode>();
+       	Set<FieldEdge> newEdges = new HashSet<FieldEdge>();
+	        
+	    for ( ObjectNode objectNode : objectRef ) {
+			if ( objectNode instanceof GlobalObject ) 
+				resultObjects.add(objectNode);				
+
+			if ( objectNode instanceof RealObject ) 
+				resultObjects.addAll(stateIn.getFieldEdges().getObjectsOfField(objectNode, getFieldName()));
+				
+			if ( objectNode instanceof PhantomObject ) {
+				resultObjects.addAll(stateIn.getFieldEdges().getObjectsOfField(objectNode, getFieldName()));
+				resultObjects.add(this);
+				newEdges.add(new FieldEdge(objectNode, getFieldName(), this));
+			}				
+		}
+	                               
         return new RegularState(transferLocalVars(stateIn.getLocalVars()),
-                transferOpStack(stateIn.getOpStack(), fieldValueSlot),
-                transferFieldEdges(stateIn.getFieldEdges()));
+                transferOpStack(stateIn.getOpStack(), new ReferenceSlot(resultObjects)),
+                transferFieldEdges(stateIn.getFieldEdges(), newEdges));
     }
+    
     
     syn ReferenceSlot FieldLoadInstruction.getLoadObjectRef(OpStack opStack) = null;
     syn ReferenceSlot GetField.getLoadObjectRef(OpStack opStack) =  (ReferenceSlot) opStack.top();
