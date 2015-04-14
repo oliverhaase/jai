@@ -5,9 +5,17 @@ aspect MethodResolution {
     
     syn String FieldLoadInstruction.getType() = ((ReferenceType) getFieldType()).getType();
     
-    syn Method EarlyBoundInvokeInstruction.getTargetMethod() = 
-        method().clazz().program().getClass(getLoadClass())
-            .resolveMethodDefinition(getMethodName(), getArguments());
+    syn Method EarlyBoundInvokeInstruction.getTargetMethod() {
+            java.lang.reflect.Method method = null;
+        try {
+            method = resolveMethodDefinition(Class.forName(getLoadClass(), false, null),
+                    getMethodName(), getArguments());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return method().clazz().program().getClass(method.getDeclaringClass().getCanonicalName())
+                .lookup(getMethodName(), getArguments());
+        }
     
      /**
      * For internal created Objects (RealObject) the dynamic type is known and can be used
@@ -18,43 +26,51 @@ aspect MethodResolution {
      * current ClassPath are used.
      */     
     syn Set<Method> LateBoundInvokeInstruction.getTargetMethods(ReferenceSlot objRef) {
-        Set<ByteCodeClass> targetClasses = new HashSet<ByteCodeClass>();
-
-        for (ObjectNode targetObject : objRef) {
-            if (targetObject instanceof RealObject)
-                targetClasses.add(method().clazz().program().getClass(((RealObject) targetObject)
-                        .getType()));
-            if (targetObject instanceof PhantomObject)
-                targetClasses.addAll(getImplementationsOf(((PhantomObject) targetObject)
-                        .getType()));
-            if (targetObject instanceof GlobalObject)
-                targetClasses.addAll(getImplementationsOf(getLoadClass()));
-        }
-
         HashSet<Method> methods = new HashSet<Method>();
 
-        for (ByteCodeClass clazz : targetClasses) 
-            methods.add(clazz.resolveMethodDefinition(getMethodName(), getArguments()));
-        
+        for (Class<?> clazz : getSubTypes(objRef)) {
+            java.lang.reflect.Method method = resolveMethodDefinition(clazz, getMethodName(),
+                    getArguments());
+            methods.add(method().clazz().program()
+                    .getClass(method.getDeclaringClass().getCanonicalName())
+                    .lookup(getMethodName(), getArguments()));
+
+        }
+
         return methods;
     }
     
-    private Set<ByteCodeClass> LateBoundInvokeInstruction.getImplementationsOf(String type) {
-        // class or method is final TODO all ctors are private <=> final
-        ByteCodeClass clazz = method().clazz().program().getClass(type);
-        if (clazz.getIsFinal() || clazz.isMethodFinal(getMethodName(), getArguments())) {
-            return Collections.singleton(clazz);
+    private Set<Class<?>> LateBoundInvokeInstruction.getSubTypes(ReferenceSlot objRef) {
+        Set<Class<?>> targetClasses = new HashSet<Class<?>>();
+        
+        try {
+            for (ObjectNode targetObject : objRef) {
+                if (targetObject instanceof RealObject)
+                    targetClasses.add(Class.forName(((RealObject) targetObject).getType()));
+                if (targetObject instanceof PhantomObject)
+                    targetClasses.addAll(getImplementationsOf(((PhantomObject) targetObject)
+                            .getType()));
+                if (targetObject instanceof GlobalObject)
+                    targetClasses.addAll(getImplementationsOf(getLoadClass()));
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
 
-        // methods of Object ? -> all Subtypes are too much -> use
-        // implementation of Object ??? (jea)
-
-        // get all Implementations of the Static Type in the current ClassPath
-        Set<ByteCodeClass> classes = new HashSet<ByteCodeClass>();
-        for (String subType : ClassPath.getInstance().getSubTypsOf(clazz.getName())) {
-            ByteCodeClass subClazz = method().clazz().program().getClass(subType);
-            if (subClazz != null)  // clazz not in current ClassPath TODO
-                classes.add(subClazz);
+        return targetClasses;
+    }
+    
+    private Set<Class<?>> LateBoundInvokeInstruction.getImplementationsOf(String type) {
+        // get all Implementations of the Type in the current ClassPath
+        Set<Class<?>> classes = new HashSet<Class<?>>();
+        for (String subType : ClassPath.getInstance().getSubTypesOf(type)) {
+            try {
+                classes.add(Class.forName(subType));
+                // classes.add(Class.forName(subType, false, null));
+            } catch (ClassNotFoundException e) {
+                // clazz not in current ClassPath TODO
+                e.printStackTrace();
+            }
         }
         return classes;
     }
@@ -83,25 +99,19 @@ aspect MethodResolution {
      * Search for the definition of {@code methodName} in this class and all SuperClasses.
      * If the method wasn't found an AssertionError is thrown.
      */ 
-    syn Method ByteCodeClass.resolveMethodDefinition(String methodName, List<Type> arguments) {
-        Method method = lookup(methodName, arguments);
-        if (method != null)
-            return method;
-
-        if (getName().equals("java.lang.Object"))
-            throw new AssertionError("Method resolution failed: " + methodName + " not found");
-
-        return program().getClass(getSuperClass()).resolveMethodDefinition(methodName, arguments);
-    }
-    
-    syn boolean ByteCodeClass.isMethodFinal(String methodName, List<Type> arguments) {
-        Method method = lookup(methodName, arguments);
-        if (method != null)
-            return method.getIsFinal();
-
-        if (getName().equals("java.lang.Object"))
-            return false; // no method definition found (must be defined in interface, so must not be final)
-
-        return program().getClass(getSuperClass()).isMethodFinal(methodName, arguments);
+    syn java.lang.reflect.Method InvokeInstruction.resolveMethodDefinition(Class clazz, String methodName, List<Type> arguments) {
+        int i = 0;
+        Class[] argumentClasses = new Class[arguments.numChildren];
+        try {
+            for (Type type : arguments) {
+                argumentClasses[i++] = Class.forName(type.getType(), false, null);
+            }
+            if (true)
+                clazz.getMethod(methodName, argumentClasses).getDeclaringClass()
+                        .getDeclaredMethod(methodName, argumentClasses);
+            return clazz.getMethod(methodName, argumentClasses);
+        } catch (Exception e) {
+            throw new NoSuchMethodError(e.getMessage());
+        }
     }
 }

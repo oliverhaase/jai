@@ -38,7 +38,7 @@ public final class ClassPath {
 	/**
 	 * Get all subtypes of {@code type} in the current Classpath.
 	 */
-	public Set<String> getSubTypsOf(String type) {
+	public Set<String> getSubTypesOf(String type) {
 		Set<String> types = reflections.getStore().getSubTypesOf(type); // getSubTypesOf(Class.forName(type));
 		return types;
 	}
