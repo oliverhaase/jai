@@ -207,6 +207,9 @@ public class AstConverterVisitor extends EmptyVisitor {
 			org.apache.bcel.generic.InvokeInstruction bcelInstruction, InvokeInstruction instruction) {
 		instruction.setLoadClass(bcelInstruction.getLoadClassType(cpg).toString());
 		instruction.setMethodName(bcelInstruction.getMethodName(cpg));
+		if (!(instruction instanceof InvokeStatic)) // add this reference
+			instruction.addArgument(AstConverter.createJastAddType(bcelInstruction
+					.getLoadClassType(cpg)));
 		for (org.apache.bcel.generic.Type argType : bcelInstruction.getArgumentTypes(cpg))
 			instruction.addArgument(AstConverter.createJastAddType(argType));
 		instruction
