@@ -53,6 +53,24 @@ public final class ClassPath {
 		return result;
 	}
 
+	public static Class<?> getClass(String className) {
+		try {
+			return Class.forName(className, false, null);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			throw new AssertionError(className + " not found");
+		}
+	}
+
+	public static Class<?> getClassIfAvailable(String className) {
+		try {
+			return Class.forName(className, false, null);
+		} catch (ClassNotFoundException | LinkageError e) {
+			System.out.println("Class not in current ClassPath: " + className);
+			return null;
+		}
+	}
+
 	private void addPlattformClasses() {
 		File file = new File(System.getProperty("java.home").replaceAll("\\\\", "/") + "/lib/");
 		List<String> jars = getJarsInDir(file);
