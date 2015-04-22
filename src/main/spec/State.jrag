@@ -54,22 +54,33 @@ aspect State {
 				transferFieldEdges(stateIn.getFieldEdges()));
 	
 	eq FieldAssignmentInstruction.transferState(RegularState stateIn) {
+    	// objectref.fieldName = top(opstack)
+ 
 	    ReferenceSlot objectRef = getStoreObjectRef(stateIn.getOpStack());
-        if (objectRef.isNullReference())
+	    
+        if ( objectRef.isNullReference() )
             return new ExceptionState(stateIn.getFieldEdges()); // illegal State (NullPointerException)
-            
-        Slot value = stateIn.getOpStack().top();
-	
-        return new RegularState(transferLocalVars(stateIn.getLocalVars()),
+        
+        if ( getFieldType() instanceof PrimitiveType ) 
+			return new RegularState(
+				stateIn.getLocalVars(),
                 transferOpStack(stateIn.getOpStack()),
-                transferFieldEdges(stateIn.getFieldEdges(), value, objectRef));
+				stateIn.getFieldEdges());
+					
+        return new RegularState(stateIn.getLocalVars(),
+				transferOpStack(stateIn.getOpStack()),
+                transferFieldEdges(stateIn.getFieldEdges(), objectRef, 
+                                   stateIn.getOpStack().top()));	
     }
+    
     syn ReferenceSlot FieldAssignmentInstruction.getStoreObjectRef(OpStack opStack) = null;     
     syn ReferenceSlot PutField.getStoreObjectRef(OpStack opStack) =  (ReferenceSlot) opStack.pop().top();
     syn ReferenceSlot Aastore.getStoreObjectRef(OpStack opStack) =   (ReferenceSlot) opStack.pop().pop().top();
     syn ReferenceSlot PutStatic.getStoreObjectRef(OpStack opStack) = new ReferenceSlot(getGlobalObject());
     
     eq FieldLoadInstruction.transferState(RegularState stateIn) {
+    	// push objectref.fieldName onto opstack
+    
     	ReferenceSlot objectRef = getLoadObjectRef(stateIn.getOpStack());
 
 		if ( objectRef.isNullReference() )

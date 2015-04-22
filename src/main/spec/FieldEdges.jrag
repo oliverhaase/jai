@@ -5,22 +5,23 @@ aspect FieldEdges {
 		
     syn FieldEdges Instruction.transferFieldEdges(FieldEdges fieldEdgesIn) = fieldEdgesIn;
 	
-    syn FieldEdges FieldAssignmentInstruction.transferFieldEdges(FieldEdges fieldEdgesIn, Slot value,
-            ReferenceSlot objReference) {
-        // notation: obj.field = value
-        HashSet<FieldEdge> fieldEdges = new HashSet<FieldEdge>();
+  
+	syn FieldEdges.FieldAssignmentInstruction.transferFieldEdges(FieldEdges fieldEdgesIn,
+								ReferenceSlot objectRef, ReferenceSlot valueRef) {
+		FieldEdges fieldEdgesOut = fieldEdgesIn;	
+							
+		for ( ObjectNode objectNode : objectRef ) 
+			for ( ObjectNode valueNode : valueRef ) 
+				fieldEdgesOut = 
+					fieldEdges.out.add(new FieldEdge(objectNode, getFieldName(), valueNode));
+		
+		return fieldEdgesOut;
+	}						
 
-        if (value instanceof ReferenceSlot)
-            for (ObjectNode obj : objReference)
-                for (ObjectNode referredValue : (ReferenceSlot) value)
-                    fieldEdges.add(new FieldEdge(obj, getFieldName(), referredValue));
-
-        return fieldEdgesIn.addAll(fieldEdges);
-    }
-    
     syn FieldEdges FieldLoadInstruction.transferFieldEdges(FieldEdges fieldEdgesIn, Set<FieldEdge> newEdges) = 
     	 fieldEdgesIn.addAll(newEdges);
     	 
+
 	
 	/*
 	
