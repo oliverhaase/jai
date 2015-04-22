@@ -79,6 +79,7 @@ public class AstConverterVisitor extends EmptyVisitor {
 	public void visitPUTFIELD(org.apache.bcel.generic.PUTFIELD bcelInstruction) {
 		PutField instruction = new PutField();
 		instruction.setFieldName(bcelInstruction.getFieldName(cpg));
+		instruction.setFieldType(AstConverter.createJastAddType(bcelInstruction.getFieldType(cpg)));
 		this.instruction = instruction;
 	}
 
@@ -86,6 +87,7 @@ public class AstConverterVisitor extends EmptyVisitor {
 	public void visitAASTORE(org.apache.bcel.generic.AASTORE bcelInstruction) {
 		Aastore instruction = new Aastore();
 		instruction.setFieldName("$components");
+		instruction.setFieldType(AstConverter.createJastAddType(bcelInstruction.getType(cpg)));
 		this.instruction = instruction;
 	}
 
@@ -93,6 +95,7 @@ public class AstConverterVisitor extends EmptyVisitor {
 	public void visitPUTSTATIC(org.apache.bcel.generic.PUTSTATIC bcelInstruction) {
 		PutStatic instruction = new PutStatic();
 		instruction.setFieldName(bcelInstruction.getFieldName(cpg));
+		instruction.setFieldType(AstConverter.createJastAddType(bcelInstruction.getFieldType(cpg)));
 		this.instruction = instruction;
 	}
 

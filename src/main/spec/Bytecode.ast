@@ -30,7 +30,7 @@ AconstNull : Instruction;
 Athrow : Instruction;
 
 
-abstract FieldAssignmentInstruction : Instruction ::= <FieldName:String>;
+abstract FieldAssignmentInstruction : Instruction ::= <FieldName:String> <FieldType:Type>;
 PutField : FieldAssignmentInstruction;
 Aastore : FieldAssignmentInstruction;
 PutStatic : FieldAssignmentInstruction;

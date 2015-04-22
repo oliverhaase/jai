@@ -70,7 +70,7 @@ aspect State {
         return new RegularState(stateIn.getLocalVars(),
 				transferOpStack(stateIn.getOpStack()),
                 transferFieldEdges(stateIn.getFieldEdges(), objectRef, 
-                                   stateIn.getOpStack().top()));	
+                                   (ReferenceSlot) stateIn.getOpStack().top()));	
     }
     
     syn ReferenceSlot FieldAssignmentInstruction.getStoreObjectRef(OpStack opStack) = null;     
