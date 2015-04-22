@@ -11,6 +11,7 @@ import org.junit.Test;
 import de.htwg_konstanz.jai.ProgramBuilder;
 import de.htwg_konstanz.jai.gen.ByteCodeClass;
 import de.htwg_konstanz.jai.gen.Instruction;
+import de.htwg_konstanz.jai.gen.InvokeInstruction;
 import de.htwg_konstanz.jai.gen.InvokeVirtual;
 import de.htwg_konstanz.jai.gen.List;
 import de.htwg_konstanz.jai.gen.Method;
@@ -28,6 +29,14 @@ public class MethodResolutionTest {
 		void object_toStringReal(int i) {
 			Object obj = new Object();
 			obj.toString();
+		}
+
+		void InvokeInstruction_resolveMethodDefinitionPhantom(InvokeInstruction i) {
+			i.resolveMethodDefinition(null, null, null);
+		}
+
+		void set_toStringPhantom(Set<?> s) {
+			s.toString();
 		}
 
 		void object_toStringPhantom(Object obj) {
@@ -77,6 +86,58 @@ public class MethodResolutionTest {
 	}
 
 	@Test
+	public void InvokeInstruction_resolveMethodDefinitionPhantom() throws Exception {
+		Method method = methods.get("InvokeInstruction_resolveMethodDefinitionPhantom");
+
+		InvokeVirtual instruction = null;
+		for (Instruction i : method.getInstructions())
+			if (i instanceof InvokeVirtual)
+				instruction = (InvokeVirtual) i;
+
+		RegularState stateIn = (RegularState) instruction.statesIn().iterator().next();
+		ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack()
+				.pop(instruction.getConsumeStack() - 1).top();
+
+		// ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack().top();
+
+		Set<Method> targetMethods = instruction.getTargetMethods(objRef);
+
+		assertEquals(1, targetMethods.size());
+		// assertTrue(targetMethods.contains(getMethod(
+		// "de.htwg_konstanz.jai.gen.InvokeInstruction",
+		// "resolveMethodDefinition",
+		// new List<Type>()
+		// .add(new ReferenceType("de.htwg_konstanz.jai.gen.InvokeInstruction"))
+		// .add(new ReferenceType("java.lang.Class"))
+		// .add(new ReferenceType("java.lang.String"))
+		// .add(new ReferenceType("de.htwg_konstanz.jai.gen.List<Type>")))));
+
+	}
+
+	@Test
+	public void set_toStringPhantom() throws Exception {
+		Method method = methods.get("set_toStringPhantom");
+
+		InvokeVirtual instruction = null;
+		for (Instruction i : method.getInstructions())
+			if (i instanceof InvokeVirtual)
+				instruction = (InvokeVirtual) i;
+
+		RegularState stateIn = (RegularState) instruction.statesIn().iterator().next();
+		// ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack()
+		// .pop(instruction.getConsumeStack()).top();
+
+		ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack().top();
+
+		Set<Method> targetMethods = instruction.getTargetMethods(objRef);
+
+		assertEquals(1, targetMethods.size());
+		assertTrue(targetMethods.contains(getMethod("java.lang.Object", "toString",
+				new List<Type>().add(new ReferenceType("java.lang.Object")))));
+
+	}
+
+	// @Test
 	public void object_toStringPhantom() throws Exception {
 		Method method = methods.get("object_toStringPhantom");
 

@@ -68,26 +68,29 @@ aspect MethodResolution {
      * If the method wasn't found an AssertionError is thrown.
      */ 
     syn java.lang.Class InvokeInstruction.resolveMethodDefinition(Class clazz, String methodName, List<Type> arguments) {
-        int i, j = 0;
-        if (this instanceof InvokeStatic)
-            i = 0;
-        else
-            i = 1;
-        Class[] argumentClasses = new Class[arguments.numChildren - i];
-        while (i < arguments.numChildren) {
-            argumentClasses[j++] = ClassPath.getClass(arguments.getChild(i++).getType());
-        }
+        Class[] argumentClasses = getArgumentClasses(arguments);
         try {
-            if (methodName.equals("<init>")) {
+            if (methodName.equals("<init>") || methodName.equals("<clinit>"))
                 return clazz.getConstructor(argumentClasses).getDeclaringClass();
-            }
-            if (true)
-                clazz.getMethod(methodName, argumentClasses).getDeclaringClass()
-                        .getDeclaredMethod(methodName, argumentClasses);
-            return clazz.getMethod(methodName, argumentClasses).getDeclaringClass();
+            else
+                return clazz.getMethod(methodName, argumentClasses).getDeclaringClass();
         } catch (NoSuchMethodException e) {
             throw new NoSuchMethodError(e.getMessage());
         }
+    }
+
+    private Class[] InvokeInstruction.getArgumentClasses(List<Type> arguments) {
+        Class[] argumentClasses = new Class[arguments.numChildren - 1];
+        for (int i = 1; i < arguments.numChildren; i++)
+            argumentClasses[i - 1] = ClassPath.getClass(arguments.getChild(i).getType());
+        return argumentClasses;
+    }
+    
+    private Class[] InvokeStatic.getArgumentClasses(List<Type> arguments) {
+        Class[] argumentClasses = new Class[arguments.numChildren];
+        for (int i = 0; i < arguments.numChildren; i++)
+            argumentClasses[i] = ClassPath.getClass(arguments.getChild(i).getType());
+        return argumentClasses;
     }
     
         
