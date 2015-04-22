@@ -8,7 +8,7 @@ aspect MethodResolution {
     syn Method EarlyBoundInvokeInstruction.getTargetMethod() {
         Class<?> targetClass = resolveMethodDefinition(ClassPath.getClass(getLoadClass()),
                 getMethodName(), getArguments());
-        return method().clazz().program().getClass(targetClass.getCanonicalName())
+        return method().clazz().program().getClass(targetClass.getName())
                 .lookup(getMethodName(), getArguments());
     }
 
@@ -17,7 +17,7 @@ aspect MethodResolution {
 
         for (Class<?> clazz : getSubTypes(objRef)) {
             Class targetClass = resolveMethodDefinition(clazz, getMethodName(), getArguments());
-            methods.add(method().clazz().program().getClass(targetClass.getCanonicalName())
+            methods.add(method().clazz().program().getClass(targetClass.getName())
                     .lookup(getMethodName(), getArguments()));
         }
 
@@ -51,7 +51,6 @@ aspect MethodResolution {
     private Set<Class<?>> LateBoundInvokeInstruction.getSubTypes(String type) {
         // get all Implementations of the Type in the current ClassPath
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        int i = 0;
         for (String subType : ClassPath.getInstance().getSubTypesOf(type)) {
             Class subClass = ClassPath.getClassIfAvailable(subType);
             if (subClass != null) // is in current ClassPath
@@ -69,6 +68,8 @@ aspect MethodResolution {
      */ 
     syn java.lang.Class InvokeInstruction.resolveMethodDefinition(Class clazz, String methodName, List<Type> arguments) {
         Class[] argumentClasses = getArgumentClasses(arguments);
+        
+        
         try {
             if (methodName.equals("<init>") || methodName.equals("<clinit>"))
                 return clazz.getConstructor(argumentClasses).getDeclaringClass();
