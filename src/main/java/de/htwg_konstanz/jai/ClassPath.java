@@ -40,6 +40,7 @@ public final class ClassPath {
 	 */
 	public Set<String> getSubTypesOf(String type) {
 		Set<String> types = reflections.getStore().getSubTypesOf(type); // getSubTypesOf(Class.forName(type));
+		types.add(type);
 		return types;
 	}
 
