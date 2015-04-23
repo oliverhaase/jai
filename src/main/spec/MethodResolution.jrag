@@ -56,7 +56,7 @@ aspect MethodResolution {
     private boolean LateBoundInvokeInstruction.declaresMethod(Class targetClass) {
         for (java.lang.reflect.Method method : targetClass.getDeclaredMethods()) {
             if (method.getName().equals(getMethodName())
-                    && method.getParameterTypes().equals(getArgumentClasses(getArguments())))
+                    && Arrays.equals(method.getParameterTypes(), getArgumentClasses(getArguments())))
                 return true;
         }
 

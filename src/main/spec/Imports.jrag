@@ -3,6 +3,9 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Collections;
+import java.util.NoSuchElementException;
+import java.util.Arrays;
+
 import de.htwg_konstanz.jai.AstConverter;
 import de.htwg_konstanz.jai.ClassPath;
 
@@ -23,7 +26,6 @@ import de.htwg_konstanz.jai.vm.PhantomObject;
 import de.htwg_konstanz.jai.vm.FieldEdges;
 import de.htwg_konstanz.jai.vm.FieldEdge;
 
-import java.util.NoSuchElementException;
 
 aspect Imports {
 }
