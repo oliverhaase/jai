@@ -9,7 +9,7 @@ aspect MethodResolution {
         Class<?> targetClass = resolveMethodDefinition(ClassPath.getClass(getLoadClass()),
                 getMethodName(), getArguments());
         return method().clazz().program().getClass(targetClass.getName())
-                .lookup(getMethodName(), getArguments());
+                .lookup(getMethodName(), getArguments(), true);
     }
 
     syn Set<Method> LateBoundInvokeInstruction.getTargetMethods(ReferenceSlot objRef) {
@@ -17,7 +17,7 @@ aspect MethodResolution {
 
         for (Class<?> clazz : getClassesDeclaringMethod(objRef)) {
             methods.add(method().clazz().program().getClass(clazz.getName())
-                    .lookup(getMethodName(), getArguments()));
+                    .lookup(getMethodName(), getArguments(), false));
         }
 
         return methods;
@@ -93,14 +93,14 @@ aspect MethodResolution {
         }
     }
 
-    protected Class[] InvokeInstruction.getArgumentClasses(List<Type> arguments) {
+    public Class[] InvokeInstruction.getArgumentClasses(List<Type> arguments) {
         Class[] argumentClasses = new Class[arguments.numChildren - 1];
         for (int i = 1; i < arguments.numChildren; i++)
             argumentClasses[i - 1] = ClassPath.getClass(arguments.getChild(i).getType());
         return argumentClasses;
     }
     
-    protected Class[] InvokeStatic.getArgumentClasses(List<Type> arguments) {
+    public Class[] InvokeStatic.getArgumentClasses(List<Type> arguments) {
         Class[] argumentClasses = new Class[arguments.numChildren];
         for (int i = 0; i < arguments.numChildren; i++)
             argumentClasses[i] = ClassPath.getClass(arguments.getChild(i).getType());
@@ -108,21 +108,21 @@ aspect MethodResolution {
     }
     
         
-    syn boolean Method.matches(String methodName, List<Type> arguments) {
+    syn boolean Method.matches(String methodName, List<Type> arguments, boolean checkThisRef) {
         if (!methodName.equals(getMethodName())
                 || arguments.getNumChild() != getArguments().getNumChild())
             return false;
-
-        for (int i = 0; i < arguments.getNumChild(); i++)
+        
+        for (int i = checkThisRef ? 0 : 1; i < arguments.getNumChild(); i++)
             if (!arguments.getChild(i).equals(getArguments().getChild(i)))
                 return false;
 
         return true;
     }
     
-    syn Method ByteCodeClass.lookup(String methodName, List<Type> arguments) {
+    syn Method ByteCodeClass.lookup(String methodName, List<Type> arguments, boolean checkThisRef) {
         for ( Method method : getMethods() )
-            if ( method.matches(methodName, arguments))
+            if ( method.matches(methodName, arguments, checkThisRef))
                 return method;
         return null;
     }

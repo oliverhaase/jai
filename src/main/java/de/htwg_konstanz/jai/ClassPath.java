@@ -68,7 +68,8 @@ public final class ClassPath {
 		try {
 			return Class.forName(className);
 		} catch (ClassNotFoundException | LinkageError e) {
-			System.out.println("Class not in current ClassPath: " + className);
+			// System.out.println("Class not in current ClassPath: " +
+			// className);
 			return null;
 		}
 	}
