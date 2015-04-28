@@ -54,12 +54,17 @@ aspect MethodResolution {
     }
 
     private boolean LateBoundInvokeInstruction.declaresMethod(Class targetClass) {
-        for (java.lang.reflect.Method method : targetClass.getDeclaredMethods()) {
-            if (method.getName().equals(getMethodName())
-                    && Arrays.equals(method.getParameterTypes(), getArgumentClasses(getArguments())))
-                return true;
+        try {
+            for (java.lang.reflect.Method method : targetClass.getDeclaredMethods()) {
+                if (method.getName().equals(getMethodName())
+                        && Arrays.equals(method.getParameterTypes(),
+                                getArgumentClasses(getArguments())))
+                    return true;
+            }
+        } catch (NoClassDefFoundError e) {
+            System.out.println("Warning: method resolution failed for " + targetClass.getName());
+            System.out.println("\t" + e.getMessage() + " used in this class couldn't be loaded ");
         }
-
         return false;
     }
     
