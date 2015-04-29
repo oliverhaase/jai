@@ -122,11 +122,6 @@ aspect State {
     
     
     eq EarlyBoundInvokeInstruction.transferState(RegularState stateIn) {
-        ReferenceSlot objectRef = (ReferenceSlot) stateIn.getOpStack().pop(getConsumeStack()).top();
-        
-        if (objectRef.isNullReference()) // TODO notwendig?
-            return new ExceptionState(stateIn.getFieldEdges()); // illegal State (NullPointerException)
-            
         Method targetMethod = getTargetMethod();
         
         return new RegularState(transferLocalVars(stateIn.getLocalVars()),
