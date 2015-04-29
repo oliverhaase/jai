@@ -18,6 +18,7 @@ import de.htwg_konstanz.jai.gen.Method;
 import de.htwg_konstanz.jai.gen.Program;
 import de.htwg_konstanz.jai.gen.ReferenceType;
 import de.htwg_konstanz.jai.gen.Type;
+import de.htwg_konstanz.jai.vm.OpStack;
 import de.htwg_konstanz.jai.vm.ReferenceSlot;
 import de.htwg_konstanz.jai.vm.RegularState;
 
@@ -47,6 +48,10 @@ public class MethodResolutionTest {
 			obj.toString();
 		}
 
+		void opstack_topReal(OpStack stack) {
+			stack.top();
+		}
+
 	}
 
 	private Program program;
@@ -70,10 +75,7 @@ public class MethodResolutionTest {
 	public void object_toStringReal() throws Exception {
 		Method method = methods.get("object_toStringReal");
 
-		InvokeVirtual instruction = null;
-		for (Instruction i : method.getInstructions())
-			if (i instanceof InvokeVirtual)
-				instruction = (InvokeVirtual) i;
+		InvokeVirtual instruction = getInvokeVirtualInstruction(method);
 
 		RegularState stateIn = (RegularState) instruction.statesIn().iterator().next();
 		// ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack()
@@ -93,10 +95,7 @@ public class MethodResolutionTest {
 	public void InvokeInstruction_resolveMethodDefinitionPhantom() throws Exception {
 		Method method = methods.get("InvokeInstruction_resolveMethodDefinitionPhantom");
 
-		InvokeVirtual instruction = null;
-		for (Instruction i : method.getInstructions())
-			if (i instanceof InvokeVirtual)
-				instruction = (InvokeVirtual) i;
+		InvokeVirtual instruction = getInvokeVirtualInstruction(method);
 
 		RegularState stateIn = (RegularState) instruction.statesIn().iterator().next();
 		ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack()
@@ -121,10 +120,7 @@ public class MethodResolutionTest {
 	public void InvokeInstruction_getArgumentClassesPhantom() throws Exception {
 		Method method = methods.get("InvokeInstruction_getArgumentClassesPhantom");
 
-		InvokeVirtual instruction = null;
-		for (Instruction i : method.getInstructions())
-			if (i instanceof InvokeVirtual)
-				instruction = (InvokeVirtual) i;
+		InvokeVirtual instruction = getInvokeVirtualInstruction(method);
 
 		RegularState stateIn = (RegularState) instruction.statesIn().iterator().next();
 		ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack()
@@ -141,10 +137,7 @@ public class MethodResolutionTest {
 	public void set_toStringPhantom() throws Exception {
 		Method method = methods.get("set_toStringPhantom");
 
-		InvokeVirtual instruction = null;
-		for (Instruction i : method.getInstructions())
-			if (i instanceof InvokeVirtual)
-				instruction = (InvokeVirtual) i;
+		InvokeVirtual instruction = getInvokeVirtualInstruction(method);
 
 		RegularState stateIn = (RegularState) instruction.statesIn().iterator().next();
 		// ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack()
@@ -158,7 +151,7 @@ public class MethodResolutionTest {
 			System.out.println(method2.clazz());
 		}
 
-		assertEquals(1, targetMethods.size());
+		assertEquals(22, targetMethods.size());
 		// assertTrue(targetMethods.contains(getMethod("java.lang.Object",
 		// "toString",
 		// new List<Type>().add(new ReferenceType("java.lang.Object")))));
@@ -169,10 +162,32 @@ public class MethodResolutionTest {
 	public void object_toStringPhantom() throws Exception {
 		Method method = methods.get("object_toStringPhantom");
 
-		InvokeVirtual instruction = null;
-		for (Instruction i : method.getInstructions())
-			if (i instanceof InvokeVirtual)
-				instruction = (InvokeVirtual) i;
+		InvokeVirtual instruction = getInvokeVirtualInstruction(method);
+
+		RegularState stateIn = (RegularState) instruction.statesIn().iterator().next();
+		// ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack()
+		// .pop(instruction.getConsumeStack()).top();
+
+		ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack().top();
+
+		Set<Method> targetMethods = null;
+		try {
+			targetMethods = instruction.getTargetMethods(objRef);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+
+		assertEquals(2650, targetMethods.size());
+		assertTrue(targetMethods.contains(getMethod("java.lang.Object", "toString",
+				new List<Type>().add(new ReferenceType("java.lang.Object")))));
+
+	}
+
+	@Test
+	public void opstack_topReal() throws Exception {
+		Method method = methods.get("opstack_topReal");
+
+		InvokeVirtual instruction = getInvokeVirtualInstruction(method);
 
 		RegularState stateIn = (RegularState) instruction.statesIn().iterator().next();
 		// ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack()
@@ -183,8 +198,8 @@ public class MethodResolutionTest {
 		Set<Method> targetMethods = instruction.getTargetMethods(objRef);
 
 		assertEquals(1, targetMethods.size());
-		assertTrue(targetMethods.contains(getMethod("java.lang.Object", "toString",
-				new List<Type>().add(new ReferenceType("java.lang.Object")))));
+		assertTrue(targetMethods.contains(getMethod("de.htwg_konstanz.jai.vm.OpStack", "top",
+				new List<Type>().add(new ReferenceType("de.htwg_konstanz.jai.vm.OpStack")))));
 
 	}
 
@@ -193,5 +208,13 @@ public class MethodResolutionTest {
 			if (method.matches(methodName, list, true))
 				return method;
 		throw new AssertionError("Used wrong class for assert");
+	}
+
+	private InvokeVirtual getInvokeVirtualInstruction(Method method) {
+		InvokeVirtual instruction = null;
+		for (Instruction i : method.getInstructions())
+			if (i instanceof InvokeVirtual)
+				instruction = (InvokeVirtual) i;
+		return instruction;
 	}
 }

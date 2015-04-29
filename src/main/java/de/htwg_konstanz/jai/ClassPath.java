@@ -59,7 +59,6 @@ public final class ClassPath {
 			return Class.forName(className);
 			// return Class.forName(className, false, null);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
 			throw new AssertionError(className + " not found");
 		}
 	}
@@ -69,7 +68,7 @@ public final class ClassPath {
 			return Class.forName(className);
 		} catch (ClassNotFoundException | LinkageError e) {
 			return null;
-		} catch (Error e) {
+		} catch (Throwable e) {
 			System.out.println("Class not in current ClassPath: " + className + " | "
 					+ e.getMessage());
 			return null;
