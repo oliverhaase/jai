@@ -49,6 +49,15 @@ public final class FieldEdges {
 		return objects;
 	}
 
+	public Set<FieldEdge> getEdgesStartingFrom(ObjectNode origin) {
+		HashSet<FieldEdge> objects = new HashSet<FieldEdge>();
+		for (FieldEdge fieldEdge : edges) {
+			if (fieldEdge.getOrigin().equals(origin))
+				objects.add(fieldEdge);
+		}
+		return objects;
+	}
+
 	// public Set<ObjectNode> getFieldValues(ReferenceSlot reference, String
 	// fieldName) {
 	// Set<ObjectNode> fieldValues = new HashSet<ObjectNode>();

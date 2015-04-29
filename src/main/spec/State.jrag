@@ -123,10 +123,34 @@ aspect State {
     
     eq EarlyBoundInvokeInstruction.transferState(RegularState stateIn) {
         Method targetMethod = getTargetMethod();
-        
+   
+        applyMethodSummary(stateIn, targetMethod);
+
         return new RegularState(transferLocalVars(stateIn.getLocalVars()),
-                transferOpStack(stateIn.getOpStack()),
-                transferFieldEdges(stateIn.getFieldEdges()));
+                transferOpStack(stateIn.getOpStack()), transferFieldEdges(stateIn.getFieldEdges()));
+    }
+
+    private void applyMethodSummary(RegularState stateIn, Method targetMethod) {
+        FieldEdges fieldEdges = FieldEdges.getInstance();
+        for (int i = 0; i <= getArguments().numChildren; i++) {
+
+            Slot argument = stateIn.getOpStack().pop(i).top();
+
+            Type type = targetMethod.getArgument(getArguments().numChildren() - i);
+
+            Set<FieldEdge> result = new HashSet<FieldEdge>();
+            if (argument instanceof ReferenceSlot) {
+                Set<FieldEdge> edgesStartingFromType = fieldEdges
+                        .getEdgesStartingFrom((ObjectNode) type);
+
+                for (FieldEdge edge : edgesStartingFromType)
+                    for (ObjectNode obj : (ReferenceSlot) argument) {
+                        result.add(new FieldEdge(obj, edge.getName(), edge.getDestination()));
+                        // TODO copy all edges starting from
+                        // edge.getDestination() too (recursive)
+                    }
+            }
+        }
     }
     
     eq LateBoundInvokeInstruction.transferState(RegularState stateIn) {
