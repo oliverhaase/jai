@@ -12,17 +12,6 @@ aspect MethodResolution {
                 .lookup(getMethodName(), getArguments(), true);
     }
 
-    syn Set<Method> LateBoundInvokeInstruction.getTargetMethods(ReferenceSlot objRef) {
-        HashSet<Method> methods = new HashSet<Method>();
-
-        for (Class<?> clazz : getClassesDeclaringMethod(objRef)) {
-            methods.add(method().clazz().program().getClass(clazz.getName())
-                    .lookup(getMethodName(), getArguments(), false));
-        }
-
-        return methods;
-    }
-        
      /**
      * For internal created Objects (RealObject) the dynamic type is known and can be used
      * to resolve the Method to invoke.
@@ -30,35 +19,56 @@ aspect MethodResolution {
      * current ClassPath are used.
      * For GlobalObjects all possible implementations of the LoadClassType in the 
      * current ClassPath are used.
-     */     
-    private Set<Class<?>> LateBoundInvokeInstruction.getClassesDeclaringMethod(ReferenceSlot objRef) {
-        Set<Class<?>> targetClasses = new HashSet<Class<?>>();
+     */ 
+    syn Set<Method> LateBoundInvokeInstruction.getTargetMethods(ReferenceSlot objRef) {
+        Set<Method> targetMethods = new HashSet<Method>();
 
         for (ObjectNode targetObject : objRef) {
-            if (targetObject instanceof RealObject)
-                targetClasses.add(ClassPath.getClass(((RealObject) targetObject).getType()));
-            if (targetObject instanceof PhantomObject)
-                targetClasses.addAll(getSubTypes(((PhantomObject) targetObject).getType()));
-            if (targetObject instanceof GlobalObject)
-                targetClasses.addAll(getSubTypes(getLoadClass()));
+            if (targetObject instanceof RealObject) {
+                String className = resolveMethodDefinition(
+                        ClassPath.getClass(((RealObject) targetObject).getType()), getMethodName(),
+                        getArguments()).getName();
+                targetMethods.add(method().clazz().program().getClass(className)
+                        .lookup(getMethodName(), getArguments(), true));
+            }
+            if (targetObject instanceof PhantomObject) {
+                targetMethods.addAll(method().clazz().program()
+                        .getClass(((PhantomObject) targetObject).getType())
+                        .getImplementations(getMethodName(), getArguments()));
+            }
+            if (targetObject instanceof GlobalObject) {
+                targetMethods.addAll(method().clazz().program()
+                                .getClass(getLoadClass())
+                                .getImplementations(getMethodName(), getArguments()));
+            }
         }
 
         if (getMethodName().equals("<init>") || getMethodName().equals("<clinit>"))
             throw new AssertionError("ctor !!!!!!!!!!!");
 
-        for (Iterator<Class<?>> classes = targetClasses.iterator(); classes.hasNext();) {
-            if (!declaresMethod(classes.next()))
+        return targetMethods;
+    }
+    
+    syn Set<Method> ByteCodeClass.getImplementations(String methodName, List<Type> arguments) {
+        HashSet<Method> methods = new HashSet<Method>();
+
+        Set<Class<?>> subTypes = getSubTypes(getName());
+        for (Iterator<Class<?>> classes = subTypes.iterator(); classes.hasNext();) {
+            if (!declaresMethod(classes.next(), methodName, arguments))
                 classes.remove();
         }
-        return targetClasses;
+
+        for (Class<?> clazz : subTypes)
+            methods.add(program().getClass(clazz.getName()).lookup(methodName, arguments, false));
+
+        return methods;
     }
 
-    private boolean LateBoundInvokeInstruction.declaresMethod(Class targetClass) {
+    private boolean ByteCodeClass.declaresMethod(Class targetClass, String methodName, List<Type> arguments) {
         try {
             for (java.lang.reflect.Method method : targetClass.getDeclaredMethods()) {
-                if (method.getName().equals(getMethodName())
-                        && Arrays.equals(method.getParameterTypes(),
-                                getArgumentClasses(getArguments())))
+                if (method.getName().equals(methodName)
+                        && Arrays.equals(method.getParameterTypes(), getArgumentClasses(arguments)))
                     return true;
             }
         } catch (NoClassDefFoundError e) {
@@ -68,7 +78,7 @@ aspect MethodResolution {
         return false;
     }
     
-    private Set<Class<?>> LateBoundInvokeInstruction.getSubTypes(String type) {
+    private Set<Class<?>> ByteCodeClass.getSubTypes(String type) {
         // get all Implementations of the Type in the current ClassPath
         Set<String> subTypes = ClassPath.getInstance().getSubTypesOf(type);
         return ClassPath.getAvailableClasses(subTypes);
@@ -88,6 +98,13 @@ aspect MethodResolution {
         } catch (NoSuchMethodException e) {
             throw new NoSuchMethodError(e.getMessage());
         }
+    }
+    
+    public Class[] ByteCodeClass.getArgumentClasses(List<Type> arguments) {
+        Class[] argumentClasses = new Class[arguments.numChildren - 1];
+        for (int i = 1; i < arguments.numChildren; i++)
+            argumentClasses[i - 1] = ClassPath.getClass(arguments.getChild(i).getType());
+        return argumentClasses;
     }
 
     public Class[] InvokeInstruction.getArgumentClasses(List<Type> arguments) {
