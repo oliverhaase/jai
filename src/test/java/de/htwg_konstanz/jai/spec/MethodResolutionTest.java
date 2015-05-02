@@ -48,6 +48,14 @@ public class MethodResolutionTest {
 			obj.toString();
 		}
 
+		void object_equalsPhantom(Object obj) {
+			obj.equals(obj);
+		}
+
+		void object_hashCodePhantom(Object obj) {
+			obj.hashCode();
+		}
+
 		void opstack_topReal(OpStack stack) {
 			stack.top();
 		}
@@ -170,17 +178,53 @@ public class MethodResolutionTest {
 
 		ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack().top();
 
-		Set<Method> targetMethods = null;
-		try {
-			targetMethods = instruction.getTargetMethods(objRef);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
+		Set<Method> targetMethods = instruction.getTargetMethods(objRef);
 
 		assertEquals(2650, targetMethods.size());
 		assertTrue(targetMethods.contains(getMethod("java.lang.Object", "toString",
 				new List<Type>().add(new ReferenceType("java.lang.Object")))));
 
+	}
+
+	@Test
+	public void object_equalsPhantom() throws Exception {
+		Method method = methods.get("object_equalsPhantom");
+
+		InvokeVirtual instruction = getInvokeVirtualInstruction(method);
+
+		RegularState stateIn = (RegularState) instruction.statesIn().iterator().next();
+		// ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack()
+		// .pop(instruction.getConsumeStack()).top();
+
+		ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack().top();
+
+		Set<Method> targetMethods = instruction.getTargetMethods(objRef);
+
+		assertEquals(1453, targetMethods.size());
+		assertTrue(targetMethods.contains(getMethod(
+				"java.lang.Object",
+				"equals",
+				new List<Type>().add(new ReferenceType("java.lang.Object")).add(
+						new ReferenceType("java.lang.Object")))));
+	}
+
+	@Test
+	public void object_hashCodePhantom() throws Exception {
+		Method method = methods.get("object_hashCodePhantom");
+
+		InvokeVirtual instruction = getInvokeVirtualInstruction(method);
+
+		RegularState stateIn = (RegularState) instruction.statesIn().iterator().next();
+		// ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack()
+		// .pop(instruction.getConsumeStack()).top();
+
+		ReferenceSlot objRef = (ReferenceSlot) stateIn.getOpStack().top();
+
+		Set<Method> targetMethods = instruction.getTargetMethods(objRef);
+
+		assertEquals(1359, targetMethods.size());
+		assertTrue(targetMethods.contains(getMethod("java.lang.Object", "hashCode",
+				new List<Type>().add(new ReferenceType("java.lang.Object")))));
 	}
 
 	@Test
