@@ -21,7 +21,18 @@ aspect FieldEdges {
     syn FieldEdges FieldLoadInstruction.transferFieldEdges(FieldEdges fieldEdgesIn, Set<FieldEdge> newEdges) = 
     	 fieldEdgesIn.addAll(newEdges);
     	 
-
+    syn FieldEdges InvokeInstruction.transferFieldEdges(FieldEdges fieldEdgesIn, Set<FieldEdge> methodSummary, 
+                                                        Map<ObjectNode, Set<ObjectNode>> mapping) {
+        Set<FieldEdge> edges = new HashSet<FieldEdge>();
+        for (FieldEdge edge : methodSummary) {
+            for (ObjectNode origin : mapping.get(edge.getOrigin())) {
+                for (ObjectNode destination : mapping.get(edge.getDestination())) {
+                    edges.add(new FieldEdge(origin, edge.getName(), destination));
+                }
+            }
+        }
+        return fieldEdgesIn.addAll(edges);
+    }       
 	
 	/*
 	

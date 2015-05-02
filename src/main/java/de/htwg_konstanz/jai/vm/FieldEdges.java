@@ -1,5 +1,6 @@
 package de.htwg_konstanz.jai.vm;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -56,6 +57,10 @@ public final class FieldEdges {
 				objects.add(fieldEdge);
 		}
 		return objects;
+	}
+
+	public Set<FieldEdge> getEdges() {
+		return Collections.unmodifiableSet(edges);
 	}
 
 	// public Set<ObjectNode> getFieldValues(ReferenceSlot reference, String

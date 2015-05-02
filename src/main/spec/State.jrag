@@ -123,47 +123,72 @@ aspect State {
     
     eq EarlyBoundInvokeInstruction.transferState(RegularState stateIn) {
         Method targetMethod = getTargetMethod();
-   
-        applyMethodSummary(stateIn, targetMethod);
+        Set<FieldEdge> methodSummary = FieldEdges.getInstance().getEdges(); 
+        Map<ObjectNode, Set<ObjectNode>> mapping = mapArguments(stateIn, targetMethod);
 
         return new RegularState(transferLocalVars(stateIn.getLocalVars()),
-                transferOpStack(stateIn.getOpStack()), transferFieldEdges(stateIn.getFieldEdges()));
+                                transferOpStack(stateIn.getOpStack()), // TODO
+                                transferFieldEdges(stateIn.getFieldEdges(), methodSummary, mapping));
     }
 
-    private void applyMethodSummary(RegularState stateIn, Method targetMethod) {
-        FieldEdges fieldEdges = FieldEdges.getInstance();
-        for (int i = 0; i <= getArguments().numChildren; i++) {
-
-            Slot argument = stateIn.getOpStack().pop(i).top();
-
-            Type type = targetMethod.getArgument(getArguments().numChildren() - i);
-
-            Set<FieldEdge> result = new HashSet<FieldEdge>();
-            if (argument instanceof ReferenceSlot) {
-                Set<FieldEdge> edgesStartingFromType = fieldEdges
-                        .getEdgesStartingFrom((ObjectNode) type);
-
-                for (FieldEdge edge : edgesStartingFromType)
-                    for (ObjectNode obj : (ReferenceSlot) argument) {
-                        result.add(new FieldEdge(obj, edge.getName(), edge.getDestination()));
-                        // TODO copy all edges starting from
-                        // edge.getDestination() too (recursive)
-                    }
-            }
-        }
-    }
     
     eq LateBoundInvokeInstruction.transferState(RegularState stateIn) {
         ReferenceSlot objectRef = (ReferenceSlot) stateIn.getOpStack().pop(getConsumeStack()).top();
-        
+
         if (objectRef.isNullReference())
-            return new ExceptionState(stateIn.getFieldEdges()); // illegal State (NullPointerException)
-            
-        Set<Method> targetMethod = getTargetMethods(objectRef);
-        
-        return new RegularState(transferLocalVars(stateIn.getLocalVars()),
-                transferOpStack(stateIn.getOpStack()),
-                transferFieldEdges(stateIn.getFieldEdges()));
+            return new ExceptionState(stateIn.getFieldEdges()); // illegal State
+                                                                // (NullPointerException)
+
+        for (Method targetMethod : getTargetMethods(objectRef)) {
+            Set<FieldEdge> methodSummary = FieldEdges.getInstance().getEdges();
+            Map<ObjectNode, Set<ObjectNode>> mapping = mapArguments(stateIn, targetMethod);
+
+            return new RegularState(transferLocalVars(stateIn.getLocalVars()),
+                    transferOpStack(stateIn.getOpStack()), // TODO
+                    transferFieldEdges(stateIn.getFieldEdges(), methodSummary, mapping));
+        }
+        return stateIn;
+
+        // mehrere States ???
+    }
+    
+    /**
+     * Maps the actual arguments to the formal parameters of the targetMethod.
+     * 
+     * @param stateIn
+     *            Used to get the arguments
+     * @param targetMethod
+     *            Used to get the parameters
+     * @return The mapping from arguments to parameters Map<parameter,
+     *         Set<argument>>
+     */
+    protected HashMap<ObjectNode, Set<ObjectNode>> InvokeInstruction.mapArguments(RegularState stateIn,
+            Method targetMethod) {
+        FieldEdges fieldEdgesMethodSummary = FieldEdges.getInstance(); // TODO
+                                                                        // methodSummary
+        HashMap<ObjectNode, Set<ObjectNode>> mapping = new HashMap<ObjectNode, Set<ObjectNode>>();
+
+        for (int i = 0; i <= getArguments().numChildren; i++) {
+            Slot argument = stateIn.getOpStack().pop(i).top();
+            Type param = targetMethod.getArgument(getArguments().numChildren() - i);
+            if (argument instanceof ReferenceSlot) {
+                Set<ObjectNode> arguments = new HashSet<ObjectNode>();
+                for (ObjectNode obj : (ReferenceSlot) argument)
+                    arguments.add(obj);
+                mapping.put((ObjectNode) param, arguments);
+            }
+        }
+
+        for (FieldEdge edge : fieldEdgesMethodSummary.getEdges()) {
+            if (edge.getDestination() instanceof FieldLoadInstruction) { // SubPhantom
+                Set<ObjectNode> arguments = new HashSet<ObjectNode>();
+                for (ObjectNode subPhantom : stateIn.getFieldEdges().getObjectsOfField(
+                        edge.getOrigin(), edge.getName()))
+                    arguments.add(subPhantom);
+                mapping.put(edge.getDestination(), arguments);
+            }
+        }
+        return mapping;
     }
     
 }
