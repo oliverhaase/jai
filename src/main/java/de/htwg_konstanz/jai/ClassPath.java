@@ -1,6 +1,8 @@
 package de.htwg_konstanz.jai;
 
 import java.io.File;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -63,16 +65,24 @@ public final class ClassPath {
 		}
 	}
 
-	public static Class<?> getClassIfAvailable(String className) {
-		try {
-			return Class.forName(className);
-		} catch (ClassNotFoundException | LinkageError e) {
-			return null;
-		} catch (Throwable e) {
-			System.out.println("Class not in current ClassPath: " + className + " | "
-					+ e.getMessage());
-			return null;
+	public static Set<Class<?>> getAvailableClasses(Set<String> classes) {
+		PrintStream stdErr = System.err;
+		System.setErr(new PrintStream(new OutputStream() {
+			public void write(int b) {
+			}
+		}));
+		Set<Class<?>> availableClasses = new HashSet<Class<?>>();
+		for (String clazz : classes) {
+			try {
+				availableClasses.add(Class.forName(clazz));
+			} catch (ClassNotFoundException | LinkageError e) {
+			} catch (Throwable e) {
+				System.out.println("Class not in current ClassPath: " + clazz + " | "
+						+ e.getMessage());
+			}
 		}
+		System.setErr(stdErr);
+		return availableClasses;
 	}
 
 	private void addPlattformClasses() {

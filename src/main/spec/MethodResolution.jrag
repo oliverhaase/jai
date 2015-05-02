@@ -70,16 +70,8 @@ aspect MethodResolution {
     
     private Set<Class<?>> LateBoundInvokeInstruction.getSubTypes(String type) {
         // get all Implementations of the Type in the current ClassPath
-        Set<Class<?>> classes = new HashSet<Class<?>>();
-        for (String subType : ClassPath.getInstance().getSubTypesOf(type)) {
-            Class subClass = ClassPath.getClassIfAvailable(subType);
-            if (subClass != null) // is in current ClassPath
-                classes.add(subClass);
-        }
-        
-        System.err.println("All: " + ClassPath.getInstance().getSubTypesOf(type).size()
-                + " found: " + classes.size());
-        return classes;
+        Set<String> subTypes = ClassPath.getInstance().getSubTypesOf(type);
+        return ClassPath.getAvailableClasses(subTypes);
     }
     
     /**
