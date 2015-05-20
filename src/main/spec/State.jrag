@@ -140,8 +140,9 @@ aspect State {
                                                                 // (NullPointerException)
 
         for (Method targetMethod : getTargetMethods(objectRef)) {
-            Set<FieldEdge> methodSummary = FieldEdges.getInstance().getEdges();
-            Map<ObjectNode, Set<ObjectNode>> mapping = mapArguments(stateIn, targetMethod);
+            Set<FieldEdge> methodSummary = FieldEdges.getInstance().getEdges(); // targetMethod
+            Map<ObjectNode, Set<ObjectNode>> mapping = mapArguments(stateIn.getOpStack(),
+                                                                   targetMethod.getParams(), methodSummary);
 
             return new RegularState(transferLocalVars(stateIn.getLocalVars()),
                     transferOpStack(stateIn.getOpStack()), // TODO
@@ -162,22 +163,18 @@ aspect State {
      * @return The mapping from arguments to parameters Map<parameter,
      *         Set<argument>>
      */
-    protected Map<PhantomObject, Set<ObjectNode>> mapArguments(RegularState stateIn,
-            Method targetMethod) {
-        FieldEdges methodSummary = FieldEdges.getInstance(); // TODO
+    protected Map<PhantomObject, Set<ObjectNode>> mapArguments(OpStack stack, List<Type> params,
+            FieldEdges methodSummary) {
         Map<PhantomObject, Set<ObjectNode>> mapping = new HashMap<PhantomObject, Set<ObjectNode>>();
-
-        int paramCount = targetMethod.getParams().getNumChild();
-        for (int i = 0; i <= paramCount; i++) {
-            Slot argument = stateIn.getOpStack().pop(i).top();
+        for (int i = 0; i <= params.getNumChild(); i++) {
+            Slot argument = stack.pop(i).top();
             if (argument instanceof ReferenceSlot) {
-                PhantomObject param = (PhantomObject) targetMethod.getParam(paramCount - i);
+                PhantomObject param = (PhantomObject) params.getChild(params.getNumChild() - i);
                 Set<ObjectNode> arguments = ((ReferenceSlot) argument).getObjects();
                 mapping.put(param, arguments);
                 mapSubPhantomObjects(mapping, methodSummary, param);
             }
         }
-
         return mapping;
     }
 
