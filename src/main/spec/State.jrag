@@ -133,7 +133,7 @@ aspect State {
 
     
     eq LateBoundInvokeInstruction.transferState(RegularState stateIn) {
-        ReferenceSlot objectRef = (ReferenceSlot) stateIn.getOpStack().pop(getConsumeStack()).top();
+        ReferenceSlot objectRef = (ReferenceSlot) stateIn.getOpStack().pop(getConsumeStack() - 1).top();
 
         if (objectRef.isNullReference())
             return new ExceptionState(stateIn.getFieldEdges()); // illegal State
@@ -162,25 +162,26 @@ aspect State {
      * @return The mapping from arguments to parameters Map<parameter,
      *         Set<argument>>
      */
-    protected HashMap<ObjectNode, Set<ObjectNode>> InvokeInstruction.mapArguments(RegularState stateIn,
+    protected Map<ObjectNode, Set<ObjectNode>> InvokeInstruction.mapArguments(RegularState stateIn,
             Method targetMethod) {
         FieldEdges fieldEdgesMethodSummary = FieldEdges.getInstance(); // TODO
                                                                         // methodSummary
-        HashMap<ObjectNode, Set<ObjectNode>> mapping = new HashMap<ObjectNode, Set<ObjectNode>>();
+        Map<ObjectNode, Set<ObjectNode>> mapping = new HashMap<ObjectNode, Set<ObjectNode>>();
 
-        for (int i = 0; i <= getArguments().numChildren; i++) {
+        for (int i = 0; i <= targetMethod.getArguments().numChildren; i++) {
             Slot argument = stateIn.getOpStack().pop(i).top();
-            Type param = targetMethod.getArgument(getArguments().numChildren() - i);
             if (argument instanceof ReferenceSlot) {
+	            Type param = targetMethod.getArgument(getArguments().numChildren() - i);
                 Set<ObjectNode> arguments = new HashSet<ObjectNode>();
-                for (ObjectNode obj : (ReferenceSlot) argument)
+                for (ObjectNode obj : (ReferenceSlot) argument) // TODO in refSlot
                     arguments.add(obj);
                 mapping.put((ObjectNode) param, arguments);
             }
         }
 
+        // rekursiv von den PhantomObjects aus (siehe jea)
         for (FieldEdge edge : fieldEdgesMethodSummary.getEdges()) {
-            if (edge.getDestination() instanceof FieldLoadInstruction) { // SubPhantom
+            if (edge.getDestination() instanceof SubPhantomObject) {
                 Set<ObjectNode> arguments = new HashSet<ObjectNode>();
                 for (ObjectNode subPhantom : stateIn.getFieldEdges().getObjectsOfField(
                         edge.getOrigin(), edge.getName()))

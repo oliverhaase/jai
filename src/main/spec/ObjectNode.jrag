@@ -1,6 +1,6 @@
 aspect ObjectNode {
 	ReferenceType implements PhantomObject;
 	NewInstruction implements RealObject;
-	FieldLoadInstruction implements PhantomObject;
+	FieldLoadInstruction implements SubPhantomObject;
 	GlobalObject implements ObjectNode;
 }
