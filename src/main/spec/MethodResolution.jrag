@@ -124,11 +124,11 @@ aspect MethodResolution {
         
     syn boolean Method.matches(String methodName, List<Type> arguments, boolean checkThisRef) {
         if (!methodName.equals(getMethodName())
-                || arguments.getNumChild() != getArguments().getNumChild())
+                || arguments.getNumChild() != getParams().getNumChild())
             return false;
         
         for (int i = checkThisRef ? 0 : 1; i < arguments.getNumChild(); i++)
-            if (!arguments.getChild(i).equals(getArguments().getChild(i)))
+            if (!arguments.getChild(i).equals(getParams().getChild(i)))
                 return false;
 
         return true;

@@ -168,10 +168,10 @@ aspect State {
                                                                         // methodSummary
         Map<ObjectNode, Set<ObjectNode>> mapping = new HashMap<ObjectNode, Set<ObjectNode>>();
 
-        for (int i = 0; i <= targetMethod.getArguments().numChildren; i++) {
+        for (int i = 0; i <= targetMethod.getParams().numChildren; i++) {
             Slot argument = stateIn.getOpStack().pop(i).top();
             if (argument instanceof ReferenceSlot) {
-	            Type param = targetMethod.getArgument(getArguments().numChildren() - i);
+                Type param = targetMethod.getParam(getArguments().numChildren() - i);
                 Set<ObjectNode> arguments = new HashSet<ObjectNode>();
                 for (ObjectNode obj : (ReferenceSlot) argument) // TODO in refSlot
                     arguments.add(obj);

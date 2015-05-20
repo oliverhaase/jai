@@ -59,12 +59,12 @@ public class AstConverter {
 			method.setIsFinal(bcelMethod.isFinal());
 
 			if (!bcelMethod.isStatic()) {
-				Type thisArgument = new ReferenceType(bcelClass.getClassName());
-				method.addArgument(thisArgument);
+				Type thisParam = new ReferenceType(bcelClass.getClassName());
+				method.addParam(thisParam);
 			}
 
-			for (org.apache.bcel.generic.Type argType : bcelMethod.getArgumentTypes())
-				method.addArgument(createJastAddType(argType));
+			for (org.apache.bcel.generic.Type paramType : bcelMethod.getArgumentTypes())
+				method.addParam(createJastAddType(paramType));
 
 			org.apache.bcel.generic.Type returnType = bcelMethod.getReturnType();
 			if (returnType.equals(BasicType.VOID))
@@ -125,16 +125,16 @@ public class AstConverter {
 		return exceptionHandlers;
 	}
 
-	public static Type createJastAddType(org.apache.bcel.generic.Type argType) {
-		if (argType instanceof BasicType)
-			return new PrimitiveType(argType.toString(), argType.getSize());
+	public static Type createJastAddType(org.apache.bcel.generic.Type type) {
+		if (type instanceof BasicType)
+			return new PrimitiveType(type.toString(), type.getSize());
 
-		if (argType instanceof ObjectType)
-			return new ReferenceType(((ObjectType) argType).getClassName());
+		if (type instanceof ObjectType)
+			return new ReferenceType(((ObjectType) type).getClassName());
 
 		// TODO Array int[] / String[]
-		if (argType instanceof org.apache.bcel.generic.ArrayType) {
-			return new ReferenceType(argType.toString());
+		if (type instanceof org.apache.bcel.generic.ArrayType) {
+			return new ReferenceType(type.toString());
 			// org.apache.bcel.generic.Type arrayType =
 			// ((org.apache.bcel.generic.ArrayType) argType)
 			// .getBasicType();
