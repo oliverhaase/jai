@@ -162,34 +162,38 @@ aspect State {
      * @return The mapping from arguments to parameters Map<parameter,
      *         Set<argument>>
      */
-    protected Map<ObjectNode, Set<ObjectNode>> InvokeInstruction.mapArguments(RegularState stateIn,
+    protected Map<PhantomObject, Set<ObjectNode>> mapArguments(RegularState stateIn,
             Method targetMethod) {
-        FieldEdges fieldEdgesMethodSummary = FieldEdges.getInstance(); // TODO
-                                                                        // methodSummary
-        Map<ObjectNode, Set<ObjectNode>> mapping = new HashMap<ObjectNode, Set<ObjectNode>>();
+        FieldEdges methodSummary = FieldEdges.getInstance(); // TODO
+        Map<PhantomObject, Set<ObjectNode>> mapping = new HashMap<PhantomObject, Set<ObjectNode>>();
 
-        for (int i = 0; i <= targetMethod.getParams().numChildren; i++) {
+        int paramCount = targetMethod.getParams().getNumChild();
+        for (int i = 0; i <= paramCount; i++) {
             Slot argument = stateIn.getOpStack().pop(i).top();
             if (argument instanceof ReferenceSlot) {
-                Type param = targetMethod.getParam(getArguments().numChildren() - i);
-                Set<ObjectNode> arguments = new HashSet<ObjectNode>();
-                for (ObjectNode obj : (ReferenceSlot) argument) // TODO in refSlot
-                    arguments.add(obj);
-                mapping.put((ObjectNode) param, arguments);
+                PhantomObject param = (PhantomObject) targetMethod.getParam(paramCount - i);
+                Set<ObjectNode> arguments = ((ReferenceSlot) argument).getObjects();
+                mapping.put(param, arguments);
+                mapSubPhantomObjects(mapping, methodSummary, param);
             }
         }
 
-        // rekursiv von den PhantomObjects aus (siehe jea)
-        for (FieldEdge edge : fieldEdgesMethodSummary.getEdges()) {
+        return mapping;
+    }
+
+    private void mapSubPhantomObjects(Map<PhantomObject, Set<ObjectNode>> mapping,
+            FieldEdges methodSummary, PhantomObject param) {
+        for (FieldEdge edge : methodSummary.getEdgesStartingFrom(param)) {
             if (edge.getDestination() instanceof SubPhantomObject) {
-                Set<ObjectNode> arguments = new HashSet<ObjectNode>();
-                for (ObjectNode subPhantom : stateIn.getFieldEdges().getObjectsOfField(
-                        edge.getOrigin(), edge.getName()))
-                    arguments.add(subPhantom);
-                mapping.put(edge.getDestination(), arguments);
+                SubPhantomObject subPhantom = (SubPhantomObject) edge.getDestination();
+                Set<ObjectNode> subArguments = new HashSet<ObjectNode>();
+                for (ObjectNode arg : mapping.get(param)) {
+                    subArguments.addAll(methodSummary.getObjectsOfField(arg, edge.getName()));
+                }
+                mapping.put(subPhantom, subArguments);
+                mapSubPhantomObjects(mapping, methodSummary, subPhantom);
             }
         }
-        return mapping;
     }
     
 }

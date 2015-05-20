@@ -1,5 +1,6 @@
 package de.htwg_konstanz.jai.vm;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -48,6 +49,10 @@ public final class ReferenceSlot implements Slot, Iterable<ObjectNode> {
 		ReferenceSlot result = new ReferenceSlot(this);
 		result.objectNodes.addAll(objectNodes);
 		return result;
+	}
+
+	public Set<ObjectNode> getObjects() {
+		return Collections.unmodifiableSet(objectNodes);
 	}
 
 	public boolean isNullReference() {
