@@ -1,6 +1,7 @@
 aspect toString {
     syn String ByteCodeClass.toString() = "ByteCodeClass: " + getName();
     syn String Method.toString() = "Method: " + getMethodName();
-    syn String Instruction.toString() = "Instruction: " + getLabel() + " - " + getPosition();
+    syn String Instruction.toString() = getClass().getSimpleName() + ": " + getLabel() + " - " + getPosition();
     syn String Type.toString() = "Type: " + getType();
+    syn String New.toString() = "New: " + getPosition() + " - " + getType();
 }

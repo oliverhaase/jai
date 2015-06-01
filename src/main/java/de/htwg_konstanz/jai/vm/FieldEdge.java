@@ -19,4 +19,10 @@ public final class FieldEdge {
 		this.name = name;
 		this.destination = destination;
 	}
+
+	@Override
+	public String toString() {
+		return "FieldEdge ['" + origin + "' --" + name + "--> '" + destination + "']";
+	}
+
 }
