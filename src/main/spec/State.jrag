@@ -170,10 +170,10 @@ aspect State {
     protected Map<PhantomObject, Set<ObjectNode>> InvokeInstruction.mapArguments(OpStack stack,
             FieldEdges fieldEdges, List<Type> params, FieldEdges methodSummary) {
         Map<PhantomObject, Set<ObjectNode>> mapping = new HashMap<PhantomObject, Set<ObjectNode>>();
-        for (int i = 0; i <= params.getNumChild(); i++) {
+        for (int i = 0; i < params.getNumChild(); i++) {
             Slot argument = stack.pop(i).top();
             if (argument instanceof ReferenceSlot) {
-                PhantomObject param = (PhantomObject) params.getChild(params.getNumChild() - i);
+                PhantomObject param = (PhantomObject) params.getChild(params.getNumChild() - 1 - i);
                 Set<ObjectNode> arguments = ((ReferenceSlot) argument).getObjects();
                 mapping.put(param, arguments);
                 mapSubPhantomObjects(mapping, fieldEdges, methodSummary, param);
