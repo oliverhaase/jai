@@ -1,0 +1,106 @@
+package de.htwg_konstanz.jai.gen;
+
+import static org.junit.Assert.*;
+
+import java.util.Map;
+import java.util.Set;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import de.htwg_konstanz.jai.gen.GetField;
+import de.htwg_konstanz.jai.gen.InvokeSpecial;
+import de.htwg_konstanz.jai.gen.List;
+import de.htwg_konstanz.jai.gen.New;
+import de.htwg_konstanz.jai.gen.PrimitiveType;
+import de.htwg_konstanz.jai.gen.ReferenceType;
+import de.htwg_konstanz.jai.gen.Type;
+import de.htwg_konstanz.jai.vm.FieldEdge;
+import de.htwg_konstanz.jai.vm.FieldEdges;
+import de.htwg_konstanz.jai.vm.ObjectNode;
+import de.htwg_konstanz.jai.vm.OpStack;
+import de.htwg_konstanz.jai.vm.PhantomObject;
+import de.htwg_konstanz.jai.vm.PrimitiveSlot;
+import de.htwg_konstanz.jai.vm.ReferenceSlot;
+
+public class InvokeInstructionTest {
+
+	private InvokeSpecial invokeSpecial;
+	private OpStack opStack;
+	private FieldEdges fieldEdges;
+	private List<Type> params;
+	private FieldEdges methodSummary;
+
+	@Before
+	public void setUp() throws Exception {
+		invokeSpecial = new InvokeSpecial();
+		ObjectNode thiz = new New();
+		ObjectNode arg1 = new New();
+		((New) arg1).setType("arg1");
+		ObjectNode arg2 = new New();
+		((New) arg2).setType("arg2");
+		ObjectNode arg3 = new New();
+		((New) arg3).setType("arg3");
+		ObjectNode arg1_f_obj1 = new New();
+		((New) arg1_f_obj1).setType("arg1_f_obj1");
+		ObjectNode obj1_f_obj2 = new New();
+		((New) obj1_f_obj2).setType("obj1_f_obj2");
+		ObjectNode obj1_g_obj5 = new New();
+		((New) obj1_g_obj5).setType("obj1_g_obj5");
+		ObjectNode obj2_f_obj3 = new New();
+		((New) obj2_f_obj3).setType("obj2_f_obj3");
+		ObjectNode obj2_f_obj4 = new New();
+		((New) obj2_f_obj4).setType("obj2_f_obj4");
+
+		ReferenceType param1 = new ReferenceType("param1");
+		ReferenceType param2 = new ReferenceType("param2");
+		ReferenceType param3 = new ReferenceType("param3");
+		ObjectNode param1_f_subPhantom1 = new GetField();
+		((GetField) param1_f_subPhantom1).setLabel("param1_f_subPhantom1");
+		ObjectNode subPhantom1_f_subPhantom2 = new GetField();
+		((GetField) subPhantom1_f_subPhantom2).setLabel("subPhantom1_f_subPhantom2");
+		ObjectNode subPhantom1_g_subPhantom5 = new GetField();
+		((GetField) subPhantom1_g_subPhantom5).setLabel("subPhantom1_g_subPhantom5");
+		ObjectNode subPhantom2_f_subPhantom3 = new GetField();
+		((GetField) subPhantom2_f_subPhantom3).setLabel("subPhantom2_f_subPhantom3");
+		ObjectNode param3_f_subPhantom6 = new GetField();
+		((GetField) param3_f_subPhantom6).setLabel("param3_f_subPhantom6");
+		ObjectNode subPhantom6_f_subPhantom7 = new GetField();
+		((GetField) subPhantom6_f_subPhantom7).setLabel("subPhantom6_f_subPhantom7");
+
+		opStack = OpStack.getEmptyStack().push(new ReferenceSlot(thiz))
+				.push(new ReferenceSlot(arg1)).push(PrimitiveSlot.getInstance(), 2)
+				.push(new ReferenceSlot(arg2)).push(new ReferenceSlot(arg3));
+
+		fieldEdges = FieldEdges.getInstance().add(new FieldEdge(arg1, "f", arg1_f_obj1))
+				.add(new FieldEdge(arg1_f_obj1, "f", obj1_f_obj2))
+				.add(new FieldEdge(arg1_f_obj1, "g", obj1_g_obj5))
+				.add(new FieldEdge(obj1_f_obj2, "f", obj2_f_obj3))
+				.add(new FieldEdge(obj1_f_obj2, "f", obj2_f_obj4))
+				.add(new FieldEdge(arg2, "f", arg1));
+
+		params = new List<Type>(param1, new PrimitiveType(), new PrimitiveType(), param2, param3);
+
+		methodSummary = FieldEdges.getInstance()
+				.add(new FieldEdge(param1, "f", param1_f_subPhantom1))
+				.add(new FieldEdge(param1_f_subPhantom1, "f", subPhantom1_f_subPhantom2))
+				.add(new FieldEdge(param1_f_subPhantom1, "g", subPhantom1_g_subPhantom5))
+				.add(new FieldEdge(subPhantom1_f_subPhantom2, "f", subPhantom2_f_subPhantom3))
+				.add(new FieldEdge(param2, "f", param1))
+				.add(new FieldEdge(param3, "f", param3_f_subPhantom6))
+				.add(new FieldEdge(param3_f_subPhantom6, "f", subPhantom6_f_subPhantom7));
+
+	}
+
+	@After
+	public void tearDown() throws Exception {
+	}
+
+	@Test
+	public final void test() {
+		Map<PhantomObject, Set<ObjectNode>> mapArguments = invokeSpecial.mapArguments(opStack,
+				fieldEdges, params, methodSummary);
+		assertEquals(9, mapArguments.size());
+	}
+}
