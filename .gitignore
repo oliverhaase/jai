@@ -13,5 +13,5 @@ doc
 target
 
 #JastAdd
-gen
+/src/main/java/de/htwg_konstanz/jai/gen/
 /bcel-5.1-sources.jar
