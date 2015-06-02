@@ -25,8 +25,18 @@ aspect FieldEdges {
                                                         Map<PhantomObject, Set<ObjectNode>> mapping) {
         Set<FieldEdge> edges = new HashSet<FieldEdge>();
         for (FieldEdge edge : methodSummary.getEdges()) {
-            for (ObjectNode origin : mapping.get(edge.getOrigin())) {
-                for (ObjectNode destination : mapping.get(edge.getDestination())) {
+            Set<ObjectNode> origins;
+            if (edge.getOrigin() instanceof PhantomObject)
+                origins = mapping.get(edge.getOrigin());
+            else
+                origins = Collections.singleton(edge.getOrigin());
+            for (ObjectNode origin : origins) {
+                Set<ObjectNode> destinations;
+                if (edge.getDestination() instanceof PhantomObject)
+                    destinations = mapping.get(edge.getDestination());
+                else
+                    destinations = Collections.singleton(edge.getDestination());
+                for (ObjectNode destination : destinations) {
                     edges.add(new FieldEdge(origin, edge.getName(), destination));
                 }
             }
