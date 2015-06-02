@@ -187,12 +187,14 @@ aspect State {
         for (FieldEdge edge : methodSummary.getEdgesStartingFrom(param)) {
             if (edge.getDestination() instanceof SubPhantomObject) {
                 SubPhantomObject subPhantom = (SubPhantomObject) edge.getDestination();
-                Set<ObjectNode> subArguments = new HashSet<ObjectNode>();
-                for (ObjectNode arg : mapping.get(param)) {
-                    subArguments.addAll(fieldEdges.getObjectsOfField(arg, edge.getName()));
+                if (!mapping.containsKey(subPhantom)) {
+                    Set<ObjectNode> subArguments = new HashSet<ObjectNode>();
+                    for (ObjectNode arg : mapping.get(param)) {
+                        subArguments.addAll(fieldEdges.getObjectsOfField(arg, edge.getName()));
+                    }
+                    mapping.put(subPhantom, subArguments);
+                    mapSubPhantomObjects(mapping, fieldEdges, methodSummary, subPhantom);
                 }
-                mapping.put(subPhantom, subArguments);
-                mapSubPhantomObjects(mapping, fieldEdges, methodSummary, subPhantom);
             }
         }
     }
