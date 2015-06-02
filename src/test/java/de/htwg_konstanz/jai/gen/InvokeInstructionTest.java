@@ -73,6 +73,13 @@ public class InvokeInstructionTest {
 		ObjectNode subPhantom8_g_subPhantom9 = new GetField();
 		((GetField) subPhantom8_g_subPhantom9).setLabel("subPhantom8_g_subPhantom9");
 
+		ObjectNode param3_g_obj8 = new New();
+		((New) param3_g_obj8).setType("param3_g_obj8");
+		ObjectNode obj8_f_obj9 = new New();
+		((New) obj8_f_obj9).setType("obj8_f_obj9");
+		ObjectNode subPhantom5_f_obj10 = new New();
+		((New) subPhantom5_f_obj10).setType("subPhantom5_f_obj10");
+
 		opStack = OpStack.getEmptyStack().push(new ReferenceSlot(thiz))
 				.push(new ReferenceSlot(arg1)).push(PrimitiveSlot.getInstance(), 2)
 				.push(new ReferenceSlot(arg2)).push(new ReferenceSlot(arg3))
@@ -95,13 +102,16 @@ public class InvokeInstructionTest {
 				.add(new FieldEdge(param1, "f", param1_f_subPhantom1))
 				.add(new FieldEdge(param1_f_subPhantom1, "f", subPhantom1_f_subPhantom2))
 				.add(new FieldEdge(param1_f_subPhantom1, "g", subPhantom1_g_subPhantom5))
+				.add(new FieldEdge(subPhantom1_g_subPhantom5, "f", subPhantom5_f_obj10))
 				.add(new FieldEdge(subPhantom1_f_subPhantom2, "f", subPhantom2_f_subPhantom3))
 				.add(new FieldEdge(param2, "f", param1))
 				.add(new FieldEdge(param3, "f", param3_f_subPhantom6))
 				.add(new FieldEdge(param3_f_subPhantom6, "f", subPhantom6_f_subPhantom7))
 				.add(new FieldEdge(param4, "f", param4_f_subPhantom8))
 				.add(new FieldEdge(param4_f_subPhantom8, "g", subPhantom8_g_subPhantom9))
-				.add(new FieldEdge(subPhantom8_g_subPhantom9, "f", param4_f_subPhantom8));
+				.add(new FieldEdge(subPhantom8_g_subPhantom9, "f", param4_f_subPhantom8))
+				.add(new FieldEdge(param3, "g", param3_g_obj8))
+				.add(new FieldEdge(param3_g_obj8, "f", obj8_f_obj9));
 
 	}
 
@@ -110,9 +120,20 @@ public class InvokeInstructionTest {
 	}
 
 	@Test
-	public final void test() {
+	public final void mapArgumentsTest() {
 		Map<PhantomObject, Set<ObjectNode>> mapArguments = invokeSpecial.mapArguments(opStack,
 				fieldEdges, params, methodSummary);
-		assertEquals(11, mapArguments.size());
+		assertEquals(12, mapArguments.size());
+	}
+
+	@Test
+	public final void transferFieldEdgesTest() {
+		Map<PhantomObject, Set<ObjectNode>> mapping = invokeSpecial.mapArguments(opStack,
+				fieldEdges, params, methodSummary);
+
+		assertEquals(10, fieldEdges.getEdges().size());
+		FieldEdges transfered = invokeSpecial
+				.transferFieldEdges(fieldEdges, methodSummary, mapping);
+		assertEquals(13, transfered.getEdges().size());
 	}
 }
