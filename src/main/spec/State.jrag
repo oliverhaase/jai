@@ -171,12 +171,12 @@ aspect State {
             FieldEdges fieldEdges, List<Type> params, FieldEdges methodSummary) {
         Map<PhantomObject, Set<ObjectNode>> mapping = new HashMap<PhantomObject, Set<ObjectNode>>();
         for (int i = 0; i < params.getNumChild(); i++) {
-            Slot argument = stack.pop(i).top();
-            if (argument instanceof ReferenceSlot) {
-                PhantomObject param = (PhantomObject) params.getChild(params.getNumChild() - 1 - i);
+            Type param = params.getChild(params.getNumChild() - 1 - i);
+            if (param instanceof PhantomObject) {
+                ReferenceSlot argument = (ReferenceSlot) stack.pop(i).top();
                 Set<ObjectNode> arguments = ((ReferenceSlot) argument).getObjects();
-                mapping.put(param, arguments);
-                mapSubPhantomObjects(mapping, fieldEdges, methodSummary, param);
+                mapping.put((PhantomObject) param, arguments);
+                mapSubPhantomObjects(mapping, fieldEdges, methodSummary, (PhantomObject) param);
             }
         }
         return mapping;
