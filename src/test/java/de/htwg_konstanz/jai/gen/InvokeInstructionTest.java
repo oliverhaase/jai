@@ -9,13 +9,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.htwg_konstanz.jai.gen.GetField;
-import de.htwg_konstanz.jai.gen.InvokeSpecial;
-import de.htwg_konstanz.jai.gen.List;
-import de.htwg_konstanz.jai.gen.New;
-import de.htwg_konstanz.jai.gen.PrimitiveType;
-import de.htwg_konstanz.jai.gen.ReferenceType;
-import de.htwg_konstanz.jai.gen.Type;
 import de.htwg_konstanz.jai.vm.FieldEdge;
 import de.htwg_konstanz.jai.vm.FieldEdges;
 import de.htwg_konstanz.jai.vm.ObjectNode;
@@ -42,6 +35,8 @@ public class InvokeInstructionTest {
 		((New) arg2).setType("arg2");
 		ObjectNode arg3 = new New();
 		((New) arg3).setType("arg3");
+		ObjectNode arg4 = new New();
+		((New) arg4).setType("arg4");
 		ObjectNode arg1_f_obj1 = new New();
 		((New) arg1_f_obj1).setType("arg1_f_obj1");
 		ObjectNode obj1_f_obj2 = new New();
@@ -52,10 +47,15 @@ public class InvokeInstructionTest {
 		((New) obj2_f_obj3).setType("obj2_f_obj3");
 		ObjectNode obj2_f_obj4 = new New();
 		((New) obj2_f_obj4).setType("obj2_f_obj4");
+		ObjectNode arg4_f_obj6 = new New();
+		((New) arg4_f_obj6).setType("arg4_f_obj6");
+		ObjectNode obj6_g_obj7 = new New();
+		((New) obj6_g_obj7).setType("obj6_g_obj7");
 
 		ReferenceType param1 = new ReferenceType("param1");
 		ReferenceType param2 = new ReferenceType("param2");
 		ReferenceType param3 = new ReferenceType("param3");
+		ReferenceType param4 = new ReferenceType("param4");
 		ObjectNode param1_f_subPhantom1 = new GetField();
 		((GetField) param1_f_subPhantom1).setLabel("param1_f_subPhantom1");
 		ObjectNode subPhantom1_f_subPhantom2 = new GetField();
@@ -68,19 +68,28 @@ public class InvokeInstructionTest {
 		((GetField) param3_f_subPhantom6).setLabel("param3_f_subPhantom6");
 		ObjectNode subPhantom6_f_subPhantom7 = new GetField();
 		((GetField) subPhantom6_f_subPhantom7).setLabel("subPhantom6_f_subPhantom7");
+		ObjectNode param4_f_subPhantom8 = new GetField();
+		((GetField) param4_f_subPhantom8).setLabel("param4_f_subPhantom8");
+		ObjectNode subPhantom8_g_subPhantom9 = new GetField();
+		((GetField) subPhantom8_g_subPhantom9).setLabel("subPhantom8_g_subPhantom9");
 
 		opStack = OpStack.getEmptyStack().push(new ReferenceSlot(thiz))
 				.push(new ReferenceSlot(arg1)).push(PrimitiveSlot.getInstance(), 2)
-				.push(new ReferenceSlot(arg2)).push(new ReferenceSlot(arg3));
+				.push(new ReferenceSlot(arg2)).push(new ReferenceSlot(arg3))
+				.push(new ReferenceSlot(arg4));
 
 		fieldEdges = FieldEdges.getInstance().add(new FieldEdge(arg1, "f", arg1_f_obj1))
 				.add(new FieldEdge(arg1_f_obj1, "f", obj1_f_obj2))
 				.add(new FieldEdge(arg1_f_obj1, "g", obj1_g_obj5))
 				.add(new FieldEdge(obj1_f_obj2, "f", obj2_f_obj3))
 				.add(new FieldEdge(obj1_f_obj2, "f", obj2_f_obj4))
-				.add(new FieldEdge(arg2, "f", arg1));
+				.add(new FieldEdge(arg4, "f", arg4_f_obj6))
+				.add(new FieldEdge(arg4_f_obj6, "f", arg4)).add(new FieldEdge(arg2, "f", arg1))
+				.add(new FieldEdge(arg4_f_obj6, "g", obj6_g_obj7))
+				.add(new FieldEdge(obj6_g_obj7, "f", arg4_f_obj6));
 
-		params = new List<Type>(param1, new PrimitiveType(), new PrimitiveType(), param2, param3);
+		params = new List<Type>(param1, new PrimitiveType(), new PrimitiveType(), param2, param3,
+				param4);
 
 		methodSummary = FieldEdges.getInstance()
 				.add(new FieldEdge(param1, "f", param1_f_subPhantom1))
@@ -89,7 +98,10 @@ public class InvokeInstructionTest {
 				.add(new FieldEdge(subPhantom1_f_subPhantom2, "f", subPhantom2_f_subPhantom3))
 				.add(new FieldEdge(param2, "f", param1))
 				.add(new FieldEdge(param3, "f", param3_f_subPhantom6))
-				.add(new FieldEdge(param3_f_subPhantom6, "f", subPhantom6_f_subPhantom7));
+				.add(new FieldEdge(param3_f_subPhantom6, "f", subPhantom6_f_subPhantom7))
+				.add(new FieldEdge(param4, "f", param4_f_subPhantom8))
+				.add(new FieldEdge(param4_f_subPhantom8, "g", subPhantom8_g_subPhantom9))
+				.add(new FieldEdge(subPhantom8_g_subPhantom9, "f", param4_f_subPhantom8));
 
 	}
 
@@ -101,6 +113,6 @@ public class InvokeInstructionTest {
 	public final void test() {
 		Map<PhantomObject, Set<ObjectNode>> mapArguments = invokeSpecial.mapArguments(opStack,
 				fieldEdges, params, methodSummary);
-		assertEquals(9, mapArguments.size());
+		assertEquals(11, mapArguments.size());
 	}
 }
