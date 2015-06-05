@@ -30,6 +30,19 @@ aspect State {
 		   
 		return resultSet;   
 	}	
+	
+    eq LateBoundInvokeInstruction.statesOut() {
+        Set<State> resultSet = new HashSet<State>();
+
+        for ( State stateIn : statesIn() ) {
+           if (stateIn instanceof ExceptionState)
+              resultSet.add(stateIn);
+           else
+              resultSet.addAll(transferStateOfLateBoundInvokeInstrutction(((RegularState) stateIn))); 
+        }
+           
+        return resultSet;   
+    }   
 				
 	
 	eq ReturnInstruction.statesOut() = null;
@@ -133,25 +146,24 @@ aspect State {
     }
 
     
-    eq LateBoundInvokeInstruction.transferState(RegularState stateIn) {
+    syn Set<State> LateBoundInvokeInstruction.transferStateOfLateBoundInvokeInstrutction(RegularState stateIn) {
+        Set<State> resultSet = new HashSet<State>();
         ReferenceSlot objectRef = (ReferenceSlot) stateIn.getOpStack().pop(getConsumeStack() - 1).top();
 
         if (objectRef.isNullReference())
-            return new ExceptionState(stateIn.getFieldEdges()); // illegal State
-                                                                // (NullPointerException)
+              return Collections.singleton(new ExceptionState(stateIn.getFieldEdges())); // illegal State (NullPointerException)
 
         for (Method targetMethod : getTargetMethods(objectRef)) {
             FieldEdges methodSummary = FieldEdges.getInstance(); // targetMethod
             Map<PhantomObject, Set<ObjectNode>> mapping = mapArguments(stateIn.getOpStack(),
                     stateIn.getFieldEdges(), targetMethod.getParams(), methodSummary);
 
-            return new RegularState(transferLocalVars(stateIn.getLocalVars()),
+            resultSet.add(new RegularState(transferLocalVars(stateIn.getLocalVars()),
                     transferOpStack(stateIn.getOpStack()), // TODO
-                    transferFieldEdges(stateIn.getFieldEdges(), methodSummary, mapping));
+                    transferFieldEdges(stateIn.getFieldEdges(), methodSummary, mapping)));
         }
-        return stateIn;
-
-        // mehrere States ???
+        
+        return resultSet;
     }
     
     /**
