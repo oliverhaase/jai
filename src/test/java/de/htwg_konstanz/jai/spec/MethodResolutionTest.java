@@ -180,7 +180,7 @@ public class MethodResolutionTest {
 
 		Set<Method> targetMethods = instruction.getTargetMethods(objRef);
 
-		assertEquals(2650, targetMethods.size());
+		assertEquals(2652, targetMethods.size());
 		assertTrue(targetMethods.contains(getMethod("java.lang.Object", "toString",
 				new List<Type>().add(new ReferenceType("java.lang.Object")))));
 
