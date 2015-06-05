@@ -1,0 +1,21 @@
+aspect MethodSummary {
+
+    syn MethodSummary Method.getMethodSummary() = 
+            ((ExitPoint) getInstruction(numChildren - 1)).getMethodSummary();
+
+    syn MethodSummary ExitPoint.getMethodSummary() {
+        Set<FieldEdge> fieldEdges = new HashSet<FieldEdge>();
+        Set<ObjectNode> objectNodes = new HashSet<ObjectNode>();
+        for (State state : statesIn()) {
+            if (state instanceof RegularState) {
+                fieldEdges.addAll(((RegularState) state).getFieldEdges().getEdges());
+                objectNodes.addAll(((ReferenceSlot) ((RegularState) state).getOpStack().top())
+                        .getObjects());
+            }
+        }
+
+        return new MethodSummary(FieldEdges.getInstance().addAll(fieldEdges), new ReferenceSlot(
+                objectNodes));
+    }
+ 
+}

@@ -28,7 +28,7 @@ import de.htwg_konstanz.jai.vm.PhantomObject;
 import de.htwg_konstanz.jai.vm.FieldEdges;
 import de.htwg_konstanz.jai.vm.FieldEdge;
 import de.htwg_konstanz.jai.vm.SubPhantomObject;
-
+import de.htwg_konstanz.jai.vm.MethodSummary;
 
 aspect Imports {
 }

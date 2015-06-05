@@ -69,26 +69,10 @@ aspect OpStack {
 	eq SWAP.transferOpStack(OpStack opStackIn) = 
 		opStackIn.pop().pop().push(opStackIn.top()).push(opStackIn.pop().top());
 		
-	
-/*
-				
-	eq InvokeInstruction.statesOut() {
-		Set<State> result = new HashSet<State>();
-
-		for ( State frameIn : statesIn() ) 
-			for ( Method targetMethod : resolveTargetMethod() ) 
-				result.add(frameIn.applyMethodSummary(
-					targetMethod.methodSummary(), 
-					getConsumeStack(), 
-					getProduceStack(), 
-					getReturnType(),
-					getPosition()));
-					
-		return result;
-	}	
+	syn OpStack InvokeInstruction.transferOpStack(OpStack opStackIn, Slot returnValue) =
+		opStackIn.pop(getConsumeStack()).push(returnValue);
 		
-	
-*/	
+
 	
 	
 	
