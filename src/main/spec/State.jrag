@@ -45,8 +45,8 @@ aspect State {
     }   
 				
 	
-	eq ReturnInstruction.statesOut() = null;
-	eq Areturn.statesOut() = null;
+    //	eq ReturnInstruction.statesOut() = null;
+    //	eq Areturn.statesOut() = null;
 	
 	
 	// transfer attribute
