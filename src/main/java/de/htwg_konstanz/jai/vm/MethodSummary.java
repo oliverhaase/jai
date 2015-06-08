@@ -7,9 +7,9 @@ import net.jcip.annotations.Immutable;
 @EqualsAndHashCode
 public final class MethodSummary {
 	private final FieldEdges fieldEdges;
-	private final ReferenceSlot returnValue;
+	private final Slot returnValue;
 
-	public MethodSummary(FieldEdges fieldEdges, ReferenceSlot returnValue) {
+	public MethodSummary(FieldEdges fieldEdges, Slot returnValue) {
 		this.fieldEdges = fieldEdges;
 		this.returnValue = returnValue;
 	}
@@ -18,7 +18,7 @@ public final class MethodSummary {
 		return fieldEdges;
 	}
 
-	public ReferenceSlot getReturnValue() {
+	public Slot getReturnValue() {
 		return returnValue;
 	}
 
