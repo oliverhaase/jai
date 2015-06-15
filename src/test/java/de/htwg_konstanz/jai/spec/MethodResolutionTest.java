@@ -12,6 +12,7 @@ import de.htwg_konstanz.jai.ProgramBuilder;
 import de.htwg_konstanz.jai.gen.ByteCodeClass;
 import de.htwg_konstanz.jai.gen.Instruction;
 import de.htwg_konstanz.jai.gen.InvokeInstruction;
+import de.htwg_konstanz.jai.gen.InvokeSpecial;
 import de.htwg_konstanz.jai.gen.InvokeVirtual;
 import de.htwg_konstanz.jai.gen.List;
 import de.htwg_konstanz.jai.gen.Method;
@@ -60,6 +61,13 @@ public class MethodResolutionTest {
 			stack.top();
 		}
 
+		void defaultCtor() {
+			new Simple();
+		}
+
+	}
+
+	private static class Simple {
 	}
 
 	private Program program;
@@ -247,6 +255,21 @@ public class MethodResolutionTest {
 
 	}
 
+	@Test
+	public void defaultCtor() throws Exception {
+		Method method = methods.get("defaultCtor");
+
+		InvokeSpecial instruction = getInvokeSpecialInstruction(method);
+
+		Method targetMethod = instruction.getTargetMethod();
+
+		assertEquals(
+				targetMethod,
+				getMethod("de.htwg_konstanz.jai.spec.MethodResolutionTest$Simple", "<init>",
+						new List<Type>().add(new ReferenceType("de.htwg_konstanz.jai.vm.OpStack"))));
+
+	}
+
 	private Method getMethod(String clazz, String methodName, List<Type> list) {
 		for (Method method : program.getClass(clazz).getMethods())
 			if (method.matches(methodName, list, true))
@@ -259,6 +282,14 @@ public class MethodResolutionTest {
 		for (Instruction i : method.getInstructions())
 			if (i instanceof InvokeVirtual)
 				instruction = (InvokeVirtual) i;
+		return instruction;
+	}
+
+	private InvokeSpecial getInvokeSpecialInstruction(Method method) {
+		InvokeSpecial instruction = null;
+		for (Instruction i : method.getInstructions())
+			if (i instanceof InvokeSpecial)
+				instruction = (InvokeSpecial) i;
 		return instruction;
 	}
 }
