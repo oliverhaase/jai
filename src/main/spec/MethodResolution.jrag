@@ -1,8 +1,5 @@
 aspect MethodResolution {
 
-    // syn nta AlienClass Program.alienClass() = new AlienClass();
-    // syn nta AlienMethod AlienClass.alienMethod() = new AlienMethod();
-    
     syn String FieldLoadInstruction.getType() = ((ReferenceType) getFieldType()).getType();
     
     syn Method EarlyBoundInvokeInstruction.getTargetMethod() {
