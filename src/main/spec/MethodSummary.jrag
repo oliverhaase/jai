@@ -1,7 +1,8 @@
 aspect MethodSummary {
 
-    syn MethodSummary Method.getMethodSummary() = 
-            ((ExitPoint) getInstruction(numChildren - 1)).getMethodSummary();
+    syn MethodSummary Method.getMethodSummary() circular [initialMethodSummary()]; 
+
+    eq Method.getMethodSummary() = ((ExitPoint) getInstruction(numChildren - 1)).getMethodSummary();
 
     syn MethodSummary ExitPoint.getMethodSummary() {
         Set<FieldEdge> fieldEdges = new HashSet<FieldEdge>();
@@ -19,7 +20,15 @@ aspect MethodSummary {
         else
             return new MethodSummary(FieldEdges.getInstance().addAll(fieldEdges), new ReferenceSlot(
                 objectNodes));
-    
     }
- 
+    
+    syn MethodSummary Method.initialMethodSummary() = new MethodSummary(FieldEdges.getInstance(), 
+                                                            getReturnType().getInitialReturnValue());
+    
+    syn Slot TypeOrVoid.getInitialReturnValue();
+    eq Void.getInitialReturnValue() = ReferenceSlot.getNullReference();
+    eq ReferenceType.getInitialReturnValue() = new ReferenceSlot((ObjectNode) this);
+    eq PrimitiveType.getInitialReturnValue() = PrimitiveSlot.getInstance();
+    
+    
 }
