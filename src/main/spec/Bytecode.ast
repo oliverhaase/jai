@@ -12,7 +12,7 @@ Method ::= <IsAbstract:boolean> <IsNative:boolean> <IsPrivate:boolean> <IsFinal:
 
 abstract TypeOrVoid;
 
-Type : TypeOrVoid ::= <Type:String>;
+abstract Type : TypeOrVoid ::= <Type:String>;
 Void : TypeOrVoid;
 
 PrimitiveType : Type ::= <Size:int>;
