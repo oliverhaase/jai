@@ -27,6 +27,10 @@ public final class FieldEdges {
 		edges = new HashSet<>(original.edges);
 	}
 
+	public FieldEdges(Set<FieldEdge> fieldEdges) {
+		edges = new HashSet<>(fieldEdges);
+	}
+
 	@CheckReturnValue
 	public FieldEdges add(FieldEdge fieldEdge) {
 		FieldEdges result = new FieldEdges(this);
