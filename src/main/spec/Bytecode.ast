@@ -6,9 +6,11 @@ GlobalObject;
 
 ByteCodeClass ::= <Name:String> <SuperClass:String> <IsFinal:boolean> Method*;
 
-Method ::= <IsAbstract:boolean> <IsNative:boolean> <IsPrivate:boolean> <IsFinal:boolean>
+Method ::= <IsAbstract:boolean> <IsPrivate:boolean> <IsFinal:boolean>
            <MethodName:String> <SignatureIndex:int> Param:Type* ReturnType:TypeOrVoid
-            <MaxLocals:int>  Instruction*;
+           <MaxLocals:int>  Instruction*;
+            
+NativeMethod : Method;
 
 abstract TypeOrVoid;
 

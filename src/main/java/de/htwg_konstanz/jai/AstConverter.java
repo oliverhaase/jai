@@ -20,6 +20,7 @@ import de.htwg_konstanz.jai.gen.EntryPoint;
 import de.htwg_konstanz.jai.gen.ExitPoint;
 import de.htwg_konstanz.jai.gen.Instruction;
 import de.htwg_konstanz.jai.gen.Method;
+import de.htwg_konstanz.jai.gen.NativeMethod;
 import de.htwg_konstanz.jai.gen.PrimitiveType;
 import de.htwg_konstanz.jai.gen.ReferenceType;
 import de.htwg_konstanz.jai.gen.SimpleInstruction;
@@ -49,10 +50,9 @@ public class AstConverter {
 		AstConverterVisitor visitor = new AstConverterVisitor(cpg);
 
 		for (org.apache.bcel.classfile.Method bcelMethod : bcelClass.getMethods()) {
-			Method method = new Method();
+			Method method = bcelMethod.isNative() ? new NativeMethod() : new Method();
 
 			method.setIsAbstract(bcelMethod.isAbstract());
-			method.setIsNative(bcelMethod.isNative());
 			method.setMethodName(bcelMethod.getName());
 			method.setSignatureIndex(bcelMethod.getSignatureIndex());
 			method.setIsPrivate(bcelMethod.isPrivate());
@@ -74,7 +74,7 @@ public class AstConverter {
 
 			clazz.addMethod(method);
 
-			if (method.getIsAbstract() || method.getIsNative())
+			if (method.getIsAbstract() || method instanceof NativeMethod)
 				continue;
 
 			method.setMaxLocals(bcelMethod.getCode().getMaxLocals());
