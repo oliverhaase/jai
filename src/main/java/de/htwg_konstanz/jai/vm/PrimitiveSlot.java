@@ -12,4 +12,9 @@ public class PrimitiveSlot implements Slot {
 	public static PrimitiveSlot getInstance() {
 		return instance;
 	}
+
+	@Override
+	public String toString() {
+		return "PrimitiveSlot";
+	}
 }

@@ -64,4 +64,12 @@ public final class ReferenceSlot implements Slot, Iterable<ObjectNode> {
 		return objectNodes.iterator();
 	}
 
+	@Override
+	public String toString() {
+		if (this == NULL_REFERENCE)
+			return "NullReference";
+		else
+			return "Reference: " + objectNodes;
+	}
+
 }

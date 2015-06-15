@@ -53,4 +53,11 @@ public final class OpStack {
 		return top;
 	}
 
+	@Override
+	public String toString() {
+		if (this == emptyStack)
+			return "EmptyStack";
+		else
+			return "[" + top + "], " + rest;
+	}
 }
