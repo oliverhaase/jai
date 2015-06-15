@@ -11,46 +11,33 @@ aspect MethodSummary {
             if (state instanceof RegularState) {
                 fieldEdges.addAll(((RegularState) state).getFieldEdges().getEdges());
                 if (method().getReturnType() instanceof ReferenceType)
-                    objectNodes.addAll(((ReferenceSlot) ((RegularState) state).getOpStack().top())
-                            .getObjects());
+                    objectNodes.addAll(((ReferenceSlot) ((RegularState) state).getOpStack().top()).getObjects());
             }
         }
-        Slot returnValueSlot;
-        if (method().getReturnType() instanceof ReferenceType)
-            returnValueSlot = new ReferenceSlot(objectNodes);
-        else
-            returnValueSlot = method().getReturnType().getSlot();
-        return new MethodSummary(new FieldEdges(fieldEdges), returnValueSlot);
+        return new MethodSummary(new FieldEdges(fieldEdges),
+                                 method().getReturnType().getSlot(new ReferenceSlot(objectNodes)));
     }
         
     eq NativeMethod.getMethodSummary() {
         Set<FieldEdge> fieldEdges = new HashSet<FieldEdge>();
         for (Type param : getParams()) {
             if (param instanceof ReferenceType)
-                fieldEdges.add(new FieldEdge(getGlobalObject(), "initalMethodSummary",
-                        (ObjectNode) param));
+                fieldEdges.add(new FieldEdge(getGlobalObject(), "initalMethodSummary", (ObjectNode) param));
         }
-        Slot returnValueSlot;
-        if (getReturnType() instanceof ReferenceType)
-            returnValueSlot = new ReferenceSlot(getGlobalObject());
-        else
-            returnValueSlot = getReturnType().getSlot();
-        return new MethodSummary(new FieldEdges(fieldEdges), returnValueSlot);
+        return new MethodSummary(new FieldEdges(fieldEdges),
+                                 getReturnType().getSlot(new ReferenceSlot(getGlobalObject())));
     }
     
-    syn MethodSummary Method.initialMethodSummary() {
-        Slot returnValueSlot;
-        if (getReturnType() instanceof ReferenceType)
-            returnValueSlot = new ReferenceSlot((ObjectNode) getReturnType());
-        else
-            returnValueSlot = getReturnType().getSlot();
-        return new MethodSummary(FieldEdges.getInstance(), returnValueSlot);
-    }
+    syn MethodSummary Method.initialMethodSummary() = 
+            new MethodSummary(FieldEdges.getInstance(), getReturnType().getInitialSlot());
     
-    syn Slot TypeOrVoid.getSlot();
-    eq Void.getSlot() = ReferenceSlot.getNullReference();
-    eq ReferenceType.getSlot() { throw new AssertionError("don't use ReferenceType.getSlot()");}
-    eq PrimitiveType.getSlot() = PrimitiveSlot.getInstance();
+    syn Slot TypeOrVoid.getSlot(ReferenceSlot refTypeSlot);
+    eq Void.getSlot(ReferenceSlot refTypeSlot) = ReferenceSlot.getNullReference();
+    eq ReferenceType.getSlot(ReferenceSlot refTypeSlot) = refTypeSlot;
+    eq PrimitiveType.getSlot(ReferenceSlot refTypeSlot) = PrimitiveSlot.getInstance();
     
-    
+    syn Slot TypeOrVoid.getInitialSlot();
+    eq Void.getInitialSlot() = ReferenceSlot.getNullReference();
+    eq ReferenceType.getInitialSlot() = new ReferenceSlot((ObjectNode) this);
+    eq PrimitiveType.getInitialSlot() = PrimitiveSlot.getInstance();
 }
