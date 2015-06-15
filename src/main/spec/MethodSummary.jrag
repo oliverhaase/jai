@@ -2,7 +2,7 @@ aspect MethodSummary {
 
     syn MethodSummary Method.getMethodSummary() circular [initialMethodSummary()]; 
 
-    eq Method.getMethodSummary() = ((ExitPoint) getInstruction(numChildren - 1)).getMethodSummary();
+    eq Method.getMethodSummary() = ((ExitPoint) getInstruction(getInstructions().numChildren - 1)).getMethodSummary();
 
     syn MethodSummary ExitPoint.getMethodSummary() {
         Set<FieldEdge> fieldEdges = new HashSet<FieldEdge>();
