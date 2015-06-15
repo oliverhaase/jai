@@ -71,6 +71,9 @@ aspect OpStack {
 		
 	syn OpStack InvokeInstruction.transferOpStack(OpStack opStackIn, Slot returnValue) =
 		opStackIn.pop(getConsumeStack()).push(returnValue);
+	
+	syn OpStack ReturnInstruction.transferOpStack(OpStack opStackIn) = opStackIn;
+    
 		
 
 	
